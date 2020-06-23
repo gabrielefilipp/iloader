@@ -1,0 +1,6 @@
+for iPhone5,2 - 11D257 (not 11B554a)
+boot-ramdisk="/a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p/q/r/s/t/u/v/w/disk.dmg"
+
+*How to jump pwnediBoot?
+You can use NOR-based dual boot techniques.
+If you do nothing, iBoot with 'ibo1' will load and jump. And, pressing Vol(-) will load iBoot with the tag 'ibo2'.
