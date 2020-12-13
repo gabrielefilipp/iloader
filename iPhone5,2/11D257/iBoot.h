@@ -83,6 +83,13 @@ real_fuck2(unsigned int r0, unsigned int r1, unsigned int r2, unsigned int r3)
     register unsigned int r9 __asm("r9");
     register unsigned int sp __asm("r11");
     if (sp <= (uintptr_t)image + 0x47C60 + 0x28 + 32 * 4) {
+        /*
+         r8 = 0xbff47c60;
+         r1 = *(r0 + 0x4);
+         r4 = (r6 + r0 & r5) - 0x40;
+         r2 = r0 + 0x40;
+         r1 = r0 + r1 * 0x40 - r4;
+         */
 #define ULAT(x) (((x) & 0xFFFFF) + IMAGE_START)
         unsigned int t4 = r2 - 0x40;
         unsigned int t1 = r0 + (r1 << 6);
