@@ -1,0 +1,66 @@
+TARGET_BASEADDR 0x5ff00000
+IBOOT_LEN 0x45000
+end 0x5ff45000
+
+===========ibex===========
+printf = 0x5ff33db1
+snprintf = 0x5ff34369
+malloc = 0x5ff18589
+free = 0x5ff1863d
+memmove = 0x5ff34840
+jumpto = 0x5ff1e6fd
+aes_crypto_cmd = 0x5ff209b5
+enter_critical_section = 0x5ff1eae1
+exit_critical_section = 0x5ff1eb4d
+h2fmi_select = 0x5ff02829
+create_envvar = 0x5ff16ead
+fs_mount = 0x5ff23079
+fs_loadfile = 0x5ff232c5
+panic = 0x5ff1e9a9
+main = 0x5ff00bd1
+task_create = 0x5ff1f0c5
+bdev_stack = 0x5ff471c8
+image_list = 0x5ff44300
+
+==========cyanide=========
+aes_crypto_cmd = 0x5ff209b5
+free = 0x5ff18915
+fs_mount = 0x5ff23110
+cmd_ramdisk = 0x0
+cmd_go = 0x5ff011f1
+image_load = 0x5ff1918c
+fsboot = 0x5ff00acd
+kernel_load = 0x5ff1ae66
+task_yield = 0x5ff1f111
+default_block_write = 0x5ff16851
+populate_images = 0x5ff196b5
+uart_read = 0x5ff1496d
+uart_write = 0x5ff1489d
+task_create = 0x0
+task_exit = 0x5ff1f249
+fs_open = 0x0
+dma_set_aes = 0x5ff01d62
+dma_generate_segments = 0x5ff0174d
+dma_generate_aes_segments = 0x5ff0174d
+dma_cancel = 0x5ff01c05
+dma_continue_async = 0x5ff0174d
+dma_int_handler = 0x5ff01b98
+cdma_init = 0x5ff0142d
+aes_hw_crypto_cmd = 0x5ff01e85
+displaypipe_init = 0x0
+h2fmi_wait_dma_task_pending = 0x5ff04770
+h2fmi_pio_read_sector = 0x5ff04959
+h2fmi_pio_write_sector = 0x5ff049f1
+h2fmi_wait_done = 0x5ff04661
+_memalign = 0x5ff18765
+_malloc = 0x5ff18589
+exit_critical_section = 0x5ff1eb4d
+enter_critical_section = 0x5ff1eae1
+sha1_calculate = 0x5ff21591
+nand_read_block_hook = 0x5ff11ae5
+uart_set_mode = 0x5ff14671
+uart_set_flow_control = 0x5ff1448d
+uart_set_baud_rate = 0x5ff147c1
+hfs_init = 0x5ff17592
+h2fmiReadBootpage = 0x5ff04095
+h2fmiWriteBootpage = 0x5ff04271
