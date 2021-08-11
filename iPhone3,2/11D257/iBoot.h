@@ -5,10 +5,10 @@
 #define IMAGE_HEAP_SIZE        0xAEFFA //should be right
 #define IMAGE_BSS_START        0x5FF41640 //yes
 #define IMAGE_BSS_END          0x5FF50004 //yes
-#define IMAGE_TEXT_END        0x5FF41000 /* XXX this is a lie */
+#define IMAGE_TEXT_END        0x5FF50000 /* XXX this is a lie */
 #define IMAGE_STACK_SIZE    0x1000 //todo
-#define IMAGE_LOADADDR        0x40000000 //tocheck
-#define IMAGE_HUGECHUNK        0x3000000 //tocheck
+#define IMAGE_LOADADDR        0x40000000 //yes
+#define IMAGE_HUGECHUNK        0x3000000 //yes
 
 
 #define breakpoint1_ADDR    (0x17850 + 1) /* ResolvePathToCatalogEntry */ //yes
@@ -486,63 +486,63 @@ int
 dispatch_SEGV(void *si_addr, _STRUCT_ARM_THREAD_STATE *tctx)
 {
     struct mmreg {
-    unsigned long mmaddr;
-    unsigned int pc;
-    int reg;
-    int val;
-    int next;
+        unsigned long mmaddr;
+        unsigned int pc;
+        int reg;
+        int val;
+        int next;
     };
 
     static const struct mmreg mmregs[] = {
     /* nop 0xbf106000, 0xbf50000{0,8,c} (serial number) */
-    { 0xbf50000c, 0x1DF78, 0, 0, 2 },
-    { 0xbf50000c, 0x1DF7A, 1, 0, 2 },
-    { 0xbf500000, 0x1DF0E, 0, 0, 2 },
-    { 0xbf500000, 0x1DF2E, 0, 0, 2 },
-    { 0xbf500000, 0x1DEFE, 0, 0, 2 },
-    { 0xbf106000, 0x1DDC8, 0, 0, 2 },
-    { 0xbf500008, 0x1DF96, 0, 0, 2 },
-    { 0xbf500008, 0x1DF9C, 2, 0, 2 },
-    { 0xbf50000c, 0x1DFA2, 3, 0, 4 },
-    { 0xbf500008, 0x1DFAA, 1, 0, 2 },
-    { 0xbf50000c, 0x1DFAC, 9, 0, 4 },
+    { 0xbf50000c, 0x1DEF8, 0, 0, 2 }, //yes
+    { 0xbf50000c, 0x1DEFA, 1, 0, 2 }, //yes
+    { 0xbf500000, 0x1DE8E, 0, 0, 2 }, //yes
+    { 0xbf500000, 0x1DEAE, 0, 0, 2 }, //yes
+    { 0xbf500000, 0x1DE7E, 0, 0, 2 }, //yes
+    { 0xbf106000, 0x1DD48, 0, 0, 2 }, //yes
+    { 0xbf500008, 0x1DF16, 0, 0, 2 }, //yes
+    { 0xbf500008, 0x1DF1C, 2, 0, 2 }, //yes
+    { 0xbf50000c, 0x1DF22, 3, 0, 4 }, //yes
+    { 0xbf500008, 0x1DF2A, 1, 0, 2 }, //yes
+    { 0xbf50000c, 0x1DF2C, 9, 0, 4 }, //yes
     /* nop 0x832000xx (boot failure count) */
-    { 0x83200000, 0x09730,-1, 0, 2 },
-    { 0x83200014, 0x09736,-1, 0, 2 },
-    { 0x83200010, 0x0973C,-1, 0, 2 },
-    { 0x83200018, 0x09742,-1, 0, 2 },
-    { 0x83200020, 0x0975A,-1, 0, 2 },
-    { 0x83200024, 0x09766,-1, 0, 2 },
+    { 0x83200000, 0x09730,-1, 0, 2 }, //yes
+    { 0x83200014, 0x09736,-1, 0, 2 }, //yes
+    { 0x83200010, 0x0973C,-1, 0, 2 }, //yes
+    { 0x83200018, 0x09742,-1, 0, 2 }, //yes
+    { 0x83200020, 0x0975A,-1, 0, 2 }, //yes
+    { 0x83200024, 0x09766,-1, 0, 2 }, //yes
     /* end-of-table */
-    { 0xFFFFFFFF, 0x00000, 0, 0, 0 },
+    { 0xFFFFFFFF, 0x00000, 0, 0, 0 }, //yes
     };
 
     const struct mmreg *m;
 
     if (si_addr == 0) {
-    if (tctx->__pc == (uintptr_t)(image + 0x1EE56)) {
-        /* idle task crap (read from *0) */
-        tctx->__r[0] = *(uint32_t *)(image);
-        tctx->__pc += 2;
-        return 0;
-    }
-    if (tctx->__pc == (uintptr_t)(image + 0x1F0B6)) {
-        tctx->__r[1] = *(uint32_t *)(image);
-        tctx->__pc += 2;
-        return 0;
-    }
+        if (tctx->__pc == (uintptr_t)(image + 0x1EE56)) { //yes
+            /* idle task crap (read from *0) */
+            tctx->__r[0] = *(uint32_t *)(image);
+            tctx->__pc += 2;
+            return 0;
+        }
+        if (tctx->__pc == (uintptr_t)(image + 0x1F0B6)) { //yes
+            tctx->__r[1] = *(uint32_t *)(image);
+            tctx->__pc += 2;
+            return 0;
+        }
     }
 
     for (m = mmregs; m->mmaddr != 0xFFFFFFFF; m++) {
-    if (si_addr == (void *)m->mmaddr && tctx->__pc == (uintptr_t)(image + m->pc)) {
-        int reg = m->reg;
-        int val = m->val;
-        if (reg >= 0) {
-        tctx->__r[reg] = val;
+        if (si_addr == (void *)m->mmaddr && tctx->__pc == (uintptr_t)(image + m->pc)) {
+            int reg = m->reg;
+            int val = m->val;
+            if (reg >= 0) {
+                tctx->__r[reg] = val;
+            }
+            tctx->__pc += m->next;
+            return 0;
         }
-        tctx->__pc += m->next;
-        return 0;
-    }
     }
 
     return -1;
@@ -640,63 +640,63 @@ patch_image(unsigned char *image)
     *(uint16_t *)(image + 0x1F0B6) = INSNT_MOV_R_R(1, 0); //yes
 #endif /* !USE_SIGNAL */
     /* timer 2 */
-    *(uint16_t *)(image + 0x1E448) = INSNT_MOV_R_I(1, 0);
-    *(uint16_t *)(image + 0x1E4D2) = INSNT_NOP;
+    *(uint16_t *)(image + 0x1E448) = INSNT_MOV_R_I(1, 0); //yes
+    *(uint16_t *)(image + 0x1E452) = INSNT_NOP;
     /* task switch FPU */
-    *(uint32_t *)(image + 0x20484) = INSNA_MOV_R2_0;
-    *(uint32_t *)(image + 0x204B4) = INSNA_MOV_R2_0;
+    *(uint32_t *)(image + 0x20338) = INSNA_MOV_R2_0; //yes
+    *(uint32_t *)(image + 0x20338) = INSNA_MOV_R2_0; //doubled?
     /* bzero during mmu_init */
-    *(uint32_t *)(image + 0x1F670) = INSN2_NOP__NOP;
+    *(uint32_t *)(image + 0x1F5F0) = INSN2_NOP__NOP; //yes
     /* nop some calls during iboot_start */
-    *(uint32_t *)(image + 0x00BD6) = INSN2_NOP__NOP;
+    *(uint32_t *)(image + 0x00BD6) = INSN2_NOP__NOP; //yes
 #if 0 /* adjust_stack */
-    *(uint32_t *)(image + 0x00BDE) = INSN2_NOP__NOP;
+    *(uint32_t *)(image + 0x00BDE) = INSN2_NOP__NOP; //yes
 #endif
 
     /* nop spi stuff */
 #if 0 /* adjust_environ */
-    *(uint32_t *)(image + 0xCBA) = INSN2_NOP__NOP;
+    *(uint32_t *)(image + 0xCBA) = INSN2_NOP__NOP; //yes
 #endif
     /* FPEXC triggered by nvram_save() */
-    *(uint32_t *)(image + 0x498) = INSNA_NOP;
-    *(uint32_t *)(image + 0x490) = INSNA_NOP;
+    *(uint32_t *)(image + 0x498) = INSNA_NOP; //yes
+    *(uint32_t *)(image + 0x490) = INSNA_NOP; //yes
 
     /* pretend we have nand device? */
-    *(uint32_t *)(image + 0xA70) = INSN2_MOV_R0_1__MOV_R0_1;
-    *(uint32_t *)(image + 0x181A2) = INSN2_MOV_R0_1__MOV_R0_1;
+    *(uint32_t *)(image + 0xA70) = INSN2_MOV_R0_1__MOV_R0_1; //yes
+    *(uint32_t *)(image + 0x18122) = INSN2_MOV_R0_1__MOV_R0_1; //yes
 
     /* make main_task show SP */
-    *(uint16_t *)(image + 0xD94) = INSNT_MOV_R_R(1, 13);
-    *(uint8_t *)(image + 0x35664) = 'x';
+    *(uint16_t *)(image + 0xD94) = INSNT_MOV_R_R(1, 13); //yes
+    *(uint8_t *)(image + 0x32CA4) = 'x'; //yes
     /* show task structure */
-    *(void **)(image + 0xFA4) = image + 0x44330;
-    *(uint8_t *)(image + 0x35650) = 'x';
+    *(void **)(image + 0xFA4) = image + 0x41330; //yes
+    *(uint8_t *)(image + 0x32C90) = 'x'; //yes
 
     /* nop NAND */
-    *(uint32_t *)(image + 0x1D9C0) = INSN2_NOP__NOP;
+    *(uint32_t *)(image + 0x1D940) = INSN2_NOP__NOP; //yes
     /* nop 0x832000xx (boot failure count) */
 #if !USE_SIGNAL
-    *(uint16_t *)(image + 0x09730) = INSNT_NOP;
-    *(uint16_t *)(image + 0x09736) = INSNT_NOP;
-    *(uint16_t *)(image + 0x0973C) = INSNT_NOP;
-    *(uint16_t *)(image + 0x09742) = INSNT_NOP;
-    *(uint16_t *)(image + 0x0975A) = INSNT_NOP;
-    *(uint16_t *)(image + 0x09766) = INSNT_NOP;
+    *(uint16_t *)(image + 0x09730) = INSNT_NOP; //yes
+    *(uint16_t *)(image + 0x09736) = INSNT_NOP; //yes
+    *(uint16_t *)(image + 0x0973C) = INSNT_NOP; //yes
+    *(uint16_t *)(image + 0x09742) = INSNT_NOP; //yes
+    *(uint16_t *)(image + 0x0975A) = INSNT_NOP; //yes
+    *(uint16_t *)(image + 0x09766) = INSNT_NOP; //yes
 #endif /* !USE_SIGNAL */
     *(uint16_t *)(image + 0x09772) = INSNT_NOP;
 
     /* nop some more hw */
-    *(uint32_t *)(image + 0x1D970) = INSN2_RETURN_0;
-    *(uint32_t *)(image + 0x1D95E) = INSN2_NOP__NOP;
-    *(uint32_t *)(image + 0x1D962) = INSN2_NOP__NOP;
+    *(uint32_t *)(image + 0x1D8F0) = INSN2_RETURN_0; //yes
+    *(uint32_t *)(image + 0x1D8DE) = INSN2_NOP__NOP; //yes
+    *(uint32_t *)(image + 0x1D8E2) = INSN2_NOP__NOP; //yes
 #if !USE_SIGNAL
     /* nop 0xbf106000, 0xbf50000{0,8,c} (serial number) */
-    *(uint32_t *)(image + 0x1DF70) = INSN2_RETURN_0;
-    *(uint32_t *)(image + 0x1DF0E) = INSN2_RETURN_0;
-    *(uint32_t *)(image + 0x1DF2E) = INSN2_RETURN_0;
-    *(uint32_t *)(image + 0x1DEFE) = INSN2_RETURN_0;
-    *(uint32_t *)(image + 0x1DDC8) = INSN2_RETURN_0;
-    *(uint32_t *)(image + 0x1DF88) = INSN2_RETURN_0;
+    *(uint32_t *)(image + 0x1DEF0) = INSN2_RETURN_0; //yes
+    *(uint32_t *)(image + 0x1DE8E) = INSN2_RETURN_0; //yes
+    *(uint32_t *)(image + 0x1DEAE) = INSN2_RETURN_0; //yes
+    *(uint32_t *)(image + 0x1DE7E) = INSN2_RETURN_0; //yes
+    *(uint32_t *)(image + 0x1DD48) = INSN2_RETURN_0; //yes
+    *(uint32_t *)(image + 0x1DF08) = INSN2_RETURN_0; //yes
 #endif /* !USE_SIGNAL */
 }
 

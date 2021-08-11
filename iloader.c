@@ -26,8 +26,8 @@
 #endif
 
 
-#define XLAT(addr)	(image + addr - IMAGE_START)
-#define CALL(func)	((func##_t)(uintptr_t)(image + func##_ADDR))
+#define XLAT(addr)    (image + addr - IMAGE_START)
+#define CALL(func)    ((func##_t)(uintptr_t)(image + func##_ADDR))
 
 
 int rfd;
@@ -108,9 +108,9 @@ my_hugechunk(void)
 {
 #ifdef __arm__
     __asm volatile (
-	"push {r1-r3,lr};"
-	"blx _gethuge;"
-	"pop {r1-r3,pc};"
+    "push {r1-r3,lr};"
+    "blx _gethuge;"
+    "pop {r1-r3,pc};"
     );
 #endif /* __arm__ */
 }
@@ -136,11 +136,12 @@ my_get_timer_us(void)
 {
 #if 0
     /* https://github.com/winocm/uboot-iphone4/blob/master/arch/arm/cpu/armv7/s5l8930/timer.c */
+    //todo, lock for the right hw
     uint32_t hi, lo, hh;
     do {
-	hi = *(uint32_t *)(0xBF100000 + 0x2004);
+    hi = *(uint32_t *)(0xBF100000 + 0x2004);
         lo = *(uint32_t *)(0xBF100000 + 0x2000);
-	hh = *(uint32_t *)(0xBF100000 + 0x2004);
+    hh = *(uint32_t *)(0xBF100000 + 0x2004);
     } while (hi != hh);
     return (hi << 32) | lo; /* usec */
 #else
@@ -195,18 +196,18 @@ handler(int signum, siginfo_t *info, void *ctx)
     _STRUCT_ARM_THREAD_STATE *tctx = &mctx->__ss;
     int i;
     if (dispatch(signum, info->si_addr, tctx) == 0) {
-	return;
+        return;
     }
     dumpfile("DUMP_signal");
     for (i = 0; i < 13; i++) {
-	eprintf("r%-2d = 0x%08x%s", i, tctx->__r[i], ((i & 3) == 3) ? "\n" : " ");
+        eprintf("r%-2d = 0x%08x%s", i, tctx->__r[i], ((i & 3) == 3) ? "\n" : " ");
     }
     eprintf("sp  = 0x%08x lr  = 0x%08x pc  = 0x%08x\ncpsr = 0x%08x\n", tctx->__sp, tctx->__lr, tctx->__pc, tctx->__cpsr);
 if (0) {
     unsigned char **fp = (unsigned char **)tctx->__r[7];
     while (*fp) {
-	eprintf("** called from 0x%x\n", (fp[1] - image) & ~1);
-	fp = (unsigned char **)*fp;
+        eprintf("** called from 0x%x\n", (fp[1] - image) & ~1);
+        fp = (unsigned char **)*fp;
     }
 }
 #else  /* !__arm__ */
@@ -223,8 +224,8 @@ dumpfile(const char *name)
 {
     int ofd = creat(name, 0644);
     if (ofd >= 0) {
-	write(ofd, image, IMAGE_SIZE + IMAGE_HEAP_SIZE);
-	close(ofd);
+        write(ofd, image, IMAGE_SIZE + IMAGE_HEAP_SIZE);
+        close(ofd);
     }
 }
 
@@ -283,10 +284,10 @@ main(int argc, char **argv)
 
     /* relocate all stored offsets */
     for (i = 0; i < IMAGE_SIZE / 4; i++) {
-	uint32_t addr = ((uint32_t *)image)[i];
-	if (addr >= IMAGE_START && addr <= IMAGE_END) {
-	    ((void **)image)[i] = XLAT(addr);
-	}
+        uint32_t addr = ((uint32_t *)image)[i];
+        if (addr >= IMAGE_START && addr <= IMAGE_END) {
+            ((void **)image)[i] = XLAT(addr);
+        }
     }
 
     patch_image(image);
@@ -294,7 +295,9 @@ main(int argc, char **argv)
     /* hook some functions */
     HOOK(cache_stuff, my_cache_stuff);
     HOOK(wait_for_event, my_wait_for_event);
-    BKPT(hugechunk, my_hugechunk, 0x1A4);
+    
+    BKPT(hugechunk, my_hugechunk, 0x1A4); //yes1
+    
     HOOK(gpio_pin_state, my_gpio_pin_state);
     HOOK(gpio_set_state, my_gpio_set_state);
     HOOK(get_timer_us, my_get_timer_us);
@@ -306,7 +309,7 @@ main(int argc, char **argv)
     HOOK(adjust_environ, my_adjust_environ);
 
     /* add breakpoints */
-    BKPT(breakpoint1, my_breakpoint1, 0x1C8);
+    BKPT(breakpoint1, my_breakpoint1, 0x1C8); //yes1
 
     /* debug memalign */
     *(uint32_t *)(image + fuck1_ADDR - 1) = make_bl(0, fuck1_ADDR - 1, 0x1B0);
@@ -329,7 +332,7 @@ main(int argc, char **argv)
 #if 0 && defined(__arm__) /* this is dangerous, enable only AFTER everything works ok */
     rv = mprotect(image + IMAGE_TEXT_END - IMAGE_START, IMAGE_END + IMAGE_HEAP_SIZE - IMAGE_TEXT_END, PROT_READ | PROT_WRITE | PROT_EXEC);
     assert(rv == 0);
-#elif 1 && defined(__arm__) /* this is even more DANGEROUS, enable only AFTER everything works ok */
+#elif 0 && defined(__arm__) /* this is even more DANGEROUS, enable only AFTER everything works ok */
     rv = mprotect(image, IMAGE_SIZE + IMAGE_HEAP_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC);
     assert(rv == 0);
     image2 = malloc(IMAGE_SIZE);
@@ -355,32 +358,32 @@ main(int argc, char **argv)
     rv = sigaction(SIGSYS, &act, NULL);
 #endif /* USE_SIGNAL */
 
-{
-    unsigned char *buf, *end;
-    fd = open("target/nettoyeur", O_RDONLY);
-    assert(fd >= 0);
-    rv = fstat(fd, &st);
-    assert(rv == 0);
-    buf = malloc(st.st_size);
-    assert(buf);
-    rv = read(fd, buf, st.st_size);
-    assert(rv == st.st_size);
-    close(fd);
-    patch_nettoyeur(buf);
-    end = compress_lzss(nettoyeur, sizeof(nettoyeur), buf, rv);
-    nettoyeur_sz = end - nettoyeur;
-    assert(nettoyeur_sz <= 230);
-    free(buf);
-}
-if (1) {
-    CALL(iboot_warmup)();
-} else {
-    void *task;
-    CALL(system_init)();
-    task = CALL(task_create)("main", (int (*)(void *))((uintptr_t)image + main_task_ADDR), NULL, 7168);
-    CALL(task_start)(task);
-    CALL(task_exit)(0);
-}
+    {
+        unsigned char *buf, *end;
+        fd = open("target/nettoyeur", O_RDONLY);
+        assert(fd >= 0);
+        rv = fstat(fd, &st);
+        assert(rv == 0);
+        buf = malloc(st.st_size);
+        assert(buf);
+        rv = read(fd, buf, st.st_size);
+        assert(rv == st.st_size);
+        close(fd);
+        patch_nettoyeur(buf);
+        end = compress_lzss(nettoyeur, sizeof(nettoyeur), buf, rv);
+        nettoyeur_sz = end - nettoyeur;
+        assert(nettoyeur_sz <= 230);
+        free(buf);
+    }
+    if (1) {
+        CALL(iboot_warmup)();
+    } else {
+        void *task;
+        CALL(system_init)();
+        task = CALL(task_create)("main", (int (*)(void *))((uintptr_t)image + main_task_ADDR), NULL, 7168);
+        CALL(task_start)(task);
+        CALL(task_exit)(0);
+    }
 
     eprintf("exiting\n");
     free(huge);
@@ -389,3 +392,4 @@ if (1) {
     free(altstack);
     return 0;
 }
+
