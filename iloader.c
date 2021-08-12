@@ -180,6 +180,7 @@ my_breakpoint1_helper(unsigned int r0, unsigned int r1, unsigned int r2, unsigne
 #else  /* !__arm__ */
     eprintf("breakpoint1: r0 = 0x%x, r1 = 0x%x, r2 = 0x%x, r3 = 0x%x, sp = 0x%x, lr = 0x%x\n", r0, r1, r2, r3, sp, lr);
 #endif /* !__arm__ */
+    dumpfile("breakpoint");
 }
 
 
@@ -332,7 +333,7 @@ main(int argc, char **argv)
 #if 0 && defined(__arm__) /* this is dangerous, enable only AFTER everything works ok */
     rv = mprotect(image + IMAGE_TEXT_END - IMAGE_START, IMAGE_END + IMAGE_HEAP_SIZE - IMAGE_TEXT_END, PROT_READ | PROT_WRITE | PROT_EXEC);
     assert(rv == 0);
-#elif 0 && defined(__arm__) /* this is even more DANGEROUS, enable only AFTER everything works ok */
+#elif 1 && defined(__arm__) /* this is even more DANGEROUS, enable only AFTER everything works ok */
     rv = mprotect(image, IMAGE_SIZE + IMAGE_HEAP_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC);
     assert(rv == 0);
     image2 = malloc(IMAGE_SIZE);

