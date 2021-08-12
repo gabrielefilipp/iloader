@@ -1,5 +1,11 @@
 #!/bin/sh
 
-scp ./iloader.c root@192.168.1.188:/var/mobile/Documents/ill/ill/iloader/iloader.c
-scp ./target/iBoot.h root@192.168.1.188:/var/mobile/Documents/ill/ill/iloader/target/iBoot.h
-ssh root@192.168.1.188 "source /etc/profile; /path/script.sh; cd /var/mobile/Documents/ill/ill/iloader; make all; ./iloader"
+TARGET=$1
+RUN=$2
+scp ./iloader.c root@192.168.1.188:/var/mobile/Documents/iloader/iloader.c
+scp ./target/iBoot.h root@192.168.1.188:/var/mobile/Documents/iloader/target/iBoot.h
+if [ -z ${RUN+x} ]; then
+	ssh root@192.168.1.188 "source /etc/profile; cd /var/mobile/Documents/iloader; rm target; rm out; ln -s $TARGET target; make all; ./iloader";
+else
+ssh root@192.168.1.188 "source /etc/profile; cd /var/mobile/Documents/iloader; rm target; rm out; ln -s $TARGET target; make all";
+fi

@@ -208,18 +208,15 @@ my_adjust_stack(void)
      ::
      ::    BUILD_TAG: 0
      ::
-     ::    BUILD_STYLE: 5ff54894
+     ::    BUILD_STYLE: 0x54894
      ::
      ::    USB_SERIAL_NUMBER: CPID:8930 CPRV:20 CPFM:03 SCEP:02 BDID:04 ECID:00000300A89CDD6E IBFL:1B SRNM:[DX4KRY0WDP0N]
      ::
      =======================================
      */
+    //wihtout anything is 0x540D4, 64 was a lucky guess?
 #if 1
-    void *ptr;
-    ptr = CALL(malloc)(2048 - 64);
-    CALL(free)(ptr);
-    CALL(malloc)(1024 - 64);
-    CALL(malloc)(1024 - 64);
+    CALL(malloc)(0x7C0 - 64); //yes
 #endif
 }
 
