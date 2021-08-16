@@ -108,9 +108,9 @@ my_hugechunk(void)
 {
 #ifdef __arm__
     __asm volatile (
-    "push {r1-r3,lr};"
-    "blx _gethuge;"
-    "pop {r1-r3,pc};"
+        "push {r1-r3,lr};"
+        "blx _gethuge;"
+        "pop {r1-r3,pc};"
     );
 #endif /* __arm__ */
 }
@@ -135,7 +135,8 @@ uint64_t
 my_get_timer_us(void)
 {
 #if 0
-    /* https://github.com/winocm/uboot-iphone4/blob/master/arch/arm/cpu/armv7/s5l8930/timer.c */
+    /* https://github.com/winocm/uboot-iphone4/blob/master/arch/arm/cpu/armv7/s5l8930/timer.c
+     */
     //todo, lock for the right hw
     uint32_t hi, lo, hh;
     do {
@@ -175,16 +176,22 @@ my_breakpoint1_helper(unsigned int r0, unsigned int r1, unsigned int r2, unsigne
 {
 #if defined(__thumb__) || (defined(__arm__) && USE_SIGNAL <= 1)
     register unsigned int r11 __asm("r11"); /* XXX these are unreliable if going through ALTHOOK */
-    eprintf("breakpoint1: %s\n", (char *)r11);
+    eprintf("breakpoint1: %s\n", (char *)r11); //0x54860
     (void)(r0 && r1 && r2 && r3 && sp && lr);
 #else  /* !__arm__ */
     eprintf("breakpoint1: r0 = 0x%x, r1 = 0x%x, r2 = 0x%x, r3 = 0x%x, sp = 0x%x, lr = 0x%x\n", r0, r1, r2, r3, sp, lr);
 #endif /* !__arm__ */
-    dumpfile("breakpoint");
+    /*
+     char name[0x20] = "breakpoint - ";
+    strcat(name, (char *)r11);
+    dumpfile(name);
+    
+    if (strcmp((char *)r11, "d") == 0) exit(0);
+     */
 }
 
 
-#include "target/iBoot.h"
+#include "iBoot.h"
 
 
 #if USE_SIGNAL
@@ -274,7 +281,7 @@ main(int argc, char **argv)
 
     close(fd);
 
-    rfd = open((argc > 1) ? argv[1] : "target/ramdisk.dmg", O_RDONLY);
+    rfd = open((argc > 1) ? argv[1] : "ramdisk.dmg", O_RDONLY);
     assert(rfd >= 0);
 
     eprintf("relocating to %p\n", image);
@@ -333,7 +340,7 @@ main(int argc, char **argv)
 #if 0 && defined(__arm__) /* this is dangerous, enable only AFTER everything works ok */
     rv = mprotect(image + IMAGE_TEXT_END - IMAGE_START, IMAGE_END + IMAGE_HEAP_SIZE - IMAGE_TEXT_END, PROT_READ | PROT_WRITE | PROT_EXEC);
     assert(rv == 0);
-#elif 1 && defined(__arm__) /* this is even more DANGEROUS, enable only AFTER everything works ok */
+#elif 0 && defined(__arm__) /* this is even more DANGEROUS, enable only AFTER everything works ok */
     rv = mprotect(image, IMAGE_SIZE + IMAGE_HEAP_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC);
     assert(rv == 0);
     image2 = malloc(IMAGE_SIZE);
@@ -361,7 +368,7 @@ main(int argc, char **argv)
 
     {
         unsigned char *buf, *end;
-        fd = open("target/nettoyeur", O_RDONLY);
+        fd = open("nettoyeur", O_RDONLY);
         assert(fd >= 0);
         rv = fstat(fd, &st);
         assert(rv == 0);
@@ -385,7 +392,7 @@ main(int argc, char **argv)
         CALL(task_start)(task);
         CALL(task_exit)(0);
     }
-
+    
     eprintf("exiting\n");
     free(huge);
     free(image);

