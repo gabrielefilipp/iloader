@@ -43,7 +43,10 @@ char c_assert[(sizeof(long) == 4) ? 1 : -1];
 
 void dumpfile(const char *name);
 void check_irq_count(void);
-
+#if MATRIX
+int node_size;
+int drill_path;
+#endif
 
 #include "asm.h"
 
@@ -181,13 +184,6 @@ my_breakpoint1_helper(unsigned int r0, unsigned int r1, unsigned int r2, unsigne
 #else  /* !__arm__ */
     eprintf("breakpoint1: r0 = 0x%x, r1 = 0x%x, r2 = 0x%x, r3 = 0x%x, sp = 0x%x, lr = 0x%x\n", r0, r1, r2, r3, sp, lr);
 #endif /* !__arm__ */
-    /*
-     char name[0x20] = "breakpoint - ";
-    strcat(name, (char *)r11);
-    dumpfile(name);
-    
-    if (strcmp((char *)r11, "d") == 0) exit(0);
-     */
 }
 
 
@@ -241,6 +237,15 @@ dumpfile(const char *name)
 int
 main(int argc, char **argv)
 {
+#if MATRIX
+    if (argc != 3) {
+        fprintf(stderr, "usage %s <node_size> <drill_path>\n", argv[0]);
+        return -1;
+    }
+    
+    node_size = atoi(argv[1]);
+    drill_path = atoi(argv[2]);
+#endif
     int rv;
     int fd;
     struct stat st;
@@ -281,7 +286,7 @@ main(int argc, char **argv)
 
     close(fd);
 
-    rfd = open((argc > 1) ? argv[1] : "ramdisk.dmg", O_RDONLY);
+    rfd = open("ramdisk.dmg", O_RDONLY);
     assert(rfd >= 0);
 
     eprintf("relocating to %p\n", image);

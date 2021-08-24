@@ -1,0 +1,42 @@
+relocating to 0x500000
+battery voltage 0 mV
+power supply type batt
+
+
+=======================================
+::
+:: iBoot for n90bap, Copyright 2013, Apple Inc.
+::
+::	BUILD_TAG: iBoot-1940.10.58
+::
+::	BUILD_STYLE: RELEASE
+::
+::	USB_SERIAL_NUMBER: CPID:8930 CPRV:00 CPFM:00 SCEP:02 BDID:00 ECID:0000000000000000 IBFL:03
+::
+=======================================
+
+Boot Failure Count: 0	Panic Fail Count: 0
+Delaying boot for 0 seconds. Hit enter to break into the command prompt...
+HFSInitPartition: 0x556180
+my_readp(0x556180, 0x544270, 0x400, 512)
+my_readp(0x556180, 0x544594, 0x8800, 256)
+my_readp(0x556180, 0x544694, 0x800, 256)
+breakpoint1: a
+my_readp(0x556180, 0x566c00, 0x8e00, 512)
+my_readp(0x556180, 0x566c00, 0x8a00, 512)
+my_readp(0x556180, 0x566c00, 0x8a00, 512)
+breakpoint1: b
+my_readp(0x556180, 0x566c00, 0x8e00, 512)
+my_readp(0x556180, 0x566c00, 0x8c00, 512)
+TRIGGERING: writed 0x10000 (BE) at offset 0x32
+_memalign: sp = 0x544840, r8 = 0x5447a0, r3 = 0x8, r2 => 0x5447e8 (0x58)
+_memalign: sp = 0x544840, r0 = 0x11f35c0, r1 = 0xb8328 (0x3ffffc0/0x62dfffc0), r2 = 0x11f3600, r3 = 0x14, r4 => (0x11f35c0/0x5fff35c0), r9 = 0x2040 (0x2e0ca00)
+_memalign: sp = 0x544840, r8 = 0x5447a0
+_memalign: sp = 0x5447d8, r8 = 0x5447a0, r3 = 0x2, r2 => 0x5447d0 (0x8)
+_memalign: sp = 0x5447d8, r0 = 0x5447f0, r1 = 0x5176a9 (0x14b1f230/0x7451f230), r2 = 0x544830, r3 = 0x2, r4 => (0x5447f0/0x5ff447f0), r9 = 0x80 (0x145daa40)
+r0  = 0x005447f0 r1  = 0x00544824 r2  = 0x00544870 r3  = 0x005448b0
+r4  = 0x00000003 r5  = 0xffffffb8 r6  = 0x00000087 r7  = 0x005447d0
+r8  = 0x005447a0 r9  = 0x00000003 r10 = 0x00000000 r11 = 0x011f35c0
+r12 = 0x005176a9 sp  = 0x005447cc lr  = 0x00518849 pc  = 0x005189b0
+cpsr = 0x20001830
+handler(11, {11, 0x47}, 0x544658)

