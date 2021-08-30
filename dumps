@@ -3,6 +3,7 @@
 sizes=(1024 2048 4096 8192)
 paths=(0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22)
 
+scp -P 2222 ./Makefile root@localhost:/var/mobile/Documents/iloader/Makefile;
 scp -P 2222 ./endian.h root@localhost:/var/mobile/Documents/iloader/endian.h;
 scp -P 2222 ./asm.h root@localhost:/var/mobile/Documents/iloader/asm.h;
 scp -P 2222 ./iloader.c root@localhost:/var/mobile/Documents/iloader/iloader.c;
@@ -13,8 +14,8 @@ for size in "${sizes[@]}"
 do
 	for path in "${paths[@]}"
 	do
-		file="out/${size}-${path}"
-		echo "Saving into ${file}"
-		ssh root@localhost -p 2222 "source /etc/profile; killall -9 iloader &> /dev/null; cd /var/mobile/Documents/iloader; script -q /dev/null ./iloader ${size} ${path} &> ${file}";
+		file="${size} ${path}"
+		echo "Processing ${file}"
+		ssh root@localhost -p 2222 "source /etc/profile; killall -9 iloader &> /dev/null; cd /var/mobile/Documents/iloader; ./iloader ${size} ${path} &> /dev/null";
 	done
 done

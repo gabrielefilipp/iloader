@@ -3,6 +3,10 @@ CFLAGS = -Wall -W -pedantic
 CFLAGS += -Wno-long-long
 CFLAGS += -O2
 CFLAGS += -DUSE_SIGNAL=2
+CFLAGS += -DSHELLCODE=0
+CFLAGS += -DNETTO=0
+CFLAGS += -DDO_STACKCHECK=1
+CFLAGS += -DDO_DUMPS=0
 CFLAGS += -march=armv7 -mthumb
 
 LD = gcc

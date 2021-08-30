@@ -43,7 +43,7 @@ char c_assert[(sizeof(long) == 4) ? 1 : -1];
 
 void dumpfile(const char *name);
 void check_irq_count(void);
-#if MATRIX
+#if DO_DUMPS || DO_BINS || DO_STACKCHECK
 int node_size;
 int drill_path;
 #endif
@@ -217,7 +217,8 @@ if (0) {
 #else  /* !__arm__ */
     (void)(uctx);
 #endif /* !__arm__ */
-    eprintf("handler(%d, {%d, %p}, %p)\n", signum, info->si_signo, info->si_addr, ctx);
+    eprintf("handler(%d, {%d, %p}, %p) => [si_signo=%d] [si_errno=%d] [si_code=%d] [si_addr=0x%x]\n", signum, info->si_signo, info->si_addr, ctx, info->si_signo, info->si_errno, info->si_code, info->si_addr);
+    eprintf("type \"man signal\" to have an overview of the signal generated\n");
     exit(2);
 }
 #endif /* USE_SIGNAL */
@@ -237,7 +238,7 @@ dumpfile(const char *name)
 int
 main(int argc, char **argv)
 {
-#if MATRIX
+#if DO_DUMPS || DO_BINS || DO_STACKCHECK
     if (argc != 3) {
         fprintf(stderr, "usage %s <node_size> <drill_path>\n", argv[0]);
         return -1;
@@ -342,7 +343,7 @@ main(int argc, char **argv)
     rv = mprotect(image, IMAGE_TEXT_END - IMAGE_START, PROT_READ | PROT_EXEC);
     assert(rv == 0);
     /* XXX MAP_JIT? */
-#if 0 && defined(__arm__) /* this is dangerous, enable only AFTER everything works ok */
+#if 1 && defined(__arm__) /* this is dangerous, enable only AFTER everything works ok */
     rv = mprotect(image + IMAGE_TEXT_END - IMAGE_START, IMAGE_END + IMAGE_HEAP_SIZE - IMAGE_TEXT_END, PROT_READ | PROT_WRITE | PROT_EXEC);
     assert(rv == 0);
 #elif 0 && defined(__arm__) /* this is even more DANGEROUS, enable only AFTER everything works ok */
