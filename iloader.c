@@ -43,7 +43,7 @@ char c_assert[(sizeof(long) == 4) ? 1 : -1];
 
 void dumpfile(const char *name);
 void check_irq_count(void);
-#if DO_DUMPS || DO_BINS || DO_STACKCHECK
+#if ARGS
 int node_size;
 int drill_path;
 #endif
@@ -138,9 +138,7 @@ uint64_t
 my_get_timer_us(void)
 {
 #if 0
-    /* https://github.com/winocm/uboot-iphone4/blob/master/arch/arm/cpu/armv7/s5l8930/timer.c
-     */
-    //todo, lock for the right hw
+    /* https://github.com/winocm/uboot-iphone4/blob/master/arch/arm/cpu/armv7/s5l8930/timer.c */
     uint32_t hi, lo, hh;
     do {
     hi = *(uint32_t *)(0xBF100000 + 0x2004);
@@ -179,7 +177,7 @@ my_breakpoint1_helper(unsigned int r0, unsigned int r1, unsigned int r2, unsigne
 {
 #if defined(__thumb__) || (defined(__arm__) && USE_SIGNAL <= 1)
     register unsigned int r11 __asm("r11"); /* XXX these are unreliable if going through ALTHOOK */
-    eprintf("breakpoint1: %s\n", (char *)r11); //0x54860
+    eprintf("breakpoint1: %s\n", (char *)r11);
     (void)(r0 && r1 && r2 && r3 && sp && lr);
 #else  /* !__arm__ */
     eprintf("breakpoint1: r0 = 0x%x, r1 = 0x%x, r2 = 0x%x, r3 = 0x%x, sp = 0x%x, lr = 0x%x\n", r0, r1, r2, r3, sp, lr);
@@ -217,7 +215,7 @@ if (0) {
 #else  /* !__arm__ */
     (void)(uctx);
 #endif /* !__arm__ */
-    eprintf("handler(%d, {%d, %p}, %p) => [si_signo=%d] [si_errno=%d] [si_code=%d] [si_addr=0x%x]\n", signum, info->si_signo, info->si_addr, ctx, info->si_signo, info->si_errno, info->si_code, info->si_addr);
+    eprintf("handler(%d, {%d, %p}, %p) => [si_signo=%d] [si_errno=%d] [si_code=%d] [si_addr=%p]\n", signum, info->si_signo, info->si_addr, ctx, info->si_signo, info->si_errno, info->si_code, info->si_addr);
     eprintf("type \"man signal\" to have an overview of the signal generated\n");
     exit(2);
 }
@@ -238,15 +236,6 @@ dumpfile(const char *name)
 int
 main(int argc, char **argv)
 {
-#if DO_DUMPS || DO_BINS || DO_STACKCHECK
-    if (argc != 3) {
-        fprintf(stderr, "usage %s <node_size> <drill_path>\n", argv[0]);
-        return -1;
-    }
-    
-    node_size = atoi(argv[1]);
-    drill_path = atoi(argv[2]);
-#endif
     int rv;
     int fd;
     struct stat st;
@@ -257,6 +246,16 @@ main(int argc, char **argv)
     struct sigaction act;
     stack_t ss;
 #endif /* USE_SIGNAL */
+    
+#if ARGS
+    if (argc != 3) {
+        fprintf(stderr, "usage %s <node_size> <drill_path>\n", argv[0]);
+        return -1;
+    }
+    
+    node_size = atoi(argv[1]);
+    drill_path = atoi(argv[2]);
+#endif
 
     srand(666);
 
@@ -310,7 +309,7 @@ main(int argc, char **argv)
     HOOK(cache_stuff, my_cache_stuff);
     HOOK(wait_for_event, my_wait_for_event);
     
-    BKPT(hugechunk, my_hugechunk, 0x1A4); //yes1
+    BKPT(hugechunk, my_hugechunk, 0x1A4);
     
     HOOK(gpio_pin_state, my_gpio_pin_state);
     HOOK(gpio_set_state, my_gpio_set_state);
@@ -323,7 +322,7 @@ main(int argc, char **argv)
     HOOK(adjust_environ, my_adjust_environ);
 
     /* add breakpoints */
-    BKPT(breakpoint1, my_breakpoint1, 0x1C8); //yes1
+    BKPT(breakpoint1, my_breakpoint1, 0x1C8);
 
     /* debug memalign */
     *(uint32_t *)(image + fuck1_ADDR - 1) = make_bl(0, fuck1_ADDR - 1, 0x1B0);
