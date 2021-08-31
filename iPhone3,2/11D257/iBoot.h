@@ -219,56 +219,6 @@ void
 suck_sid(void)
 {
     fprintf(stderr, "suck sid\n");
-#if 0
-    /* XXX missing 44368 (bootstrap_task::irq_disable_count=2 vs 1), 44380 (bootstrap_task::registers.R9=5FF489C0 vs 0) */
-    *(uint32_t *)XLAT(0x5ff44170) = 0x00000000;
-    *(uint32_t *)XLAT(0x5ff44174) = 0x00000000;
-    *(uint32_t *)XLAT(0x5ff44178) = 0x00000000;
-    *(uint32_t *)XLAT(0x5ff4417c) = 0x00000000;
-    *(uint32_t *)XLAT(0x5ff4423c) = 0xffffffff;
-    *(uint32_t *)XLAT(0x5ff44258) = 0x00000000;
-    *(uint32_t *)XLAT(0x5ff4425c) = 0xffffffff;
-    *(uint32_t *)XLAT(0x5ff44260) = 0x00000000;
-    *(uint32_t *)XLAT(0x5ff44264) = 0x00000000;
-    *(uint32_t *)XLAT(0x5ff44270) = 0x00000000;
-    *(uint32_t *)XLAT(0x5ff44274) = 0x00000000;
-    *(uint32_t *)XLAT(0x5ff4427c) = 0x00000000;
-    *(uint32_t *)XLAT(0x5ff44284) = 0x00000000;
-    *(uint32_t *)XLAT(0x5ff4428c) = 0x00000000;
-    *(uint32_t *)XLAT(0x5ff44290) = 0x00000000;
-    *(uint32_t *)XLAT(0x5ff44294) = 0x00000000;
-    *(uint32_t *)XLAT(0x5ff44298) = 0x00000000;
-    *(uint32_t *)XLAT(0x5ff4429c) = 0x00000000;
-    *(uint32_t *)XLAT(0x5ff442a0) = 0x00000000;
-    *(uint32_t *)XLAT(0x5ff442a4) = 0x00000000;
-    *(uint32_t *)XLAT(0x5ff442a8) = 0x00000000;
-    *(uint32_t *)XLAT(0x5ff442c0) = 0x00000001;
-    *(uint32_t *)XLAT(0x5ff442c4) = 0x00000011;
-    *(uint32_t *)XLAT(0x5ff442c8) = XLAT(0x5ff442c8);
-    *(uint32_t *)XLAT(0x5ff442cc) = XLAT(0x5ff442c8);
-    *(uint32_t *)XLAT(0x5ff44300) = XLAT(0x5ff44300);
-    *(uint32_t *)XLAT(0x5ff44304) = XLAT(0x5ff44300);
-    *(uint32_t *)XLAT(0x5ff44308) = XLAT(0x5ff44308);
-    *(uint32_t *)XLAT(0x5ff4430c) = XLAT(0x5ff44308);
-    *(uint32_t *)XLAT(0x5ff44314) = 0xffffffff;
-    *(uint32_t *)XLAT(0x5ff44318) = 0xffffffff;
-    *(uint32_t *)XLAT(0x5ff44330) = XLAT(0x5ff44350);
-    *(uint32_t *)XLAT(0x5ff44348) = XLAT(0x5ff44348);
-    *(uint32_t *)XLAT(0x5ff4434c) = XLAT(0x5ff44348);
-    *(uint32_t *)XLAT(0x5ff44364) = 0x00000002;
-    *(uint32_t *)XLAT(0x5ff4436c) = 0x00000000;
-    *(uint32_t *)XLAT(0x5ff44370) = 0x00000000;
-    *(uint32_t *)XLAT(0x5ff44374) = 0x00000000;
-    *(uint32_t *)XLAT(0x5ff44378) = 0x00000000;
-    *(uint32_t *)XLAT(0x5ff44388) = 0x00000000;
-    *(uint32_t *)XLAT(0x5ff4438c) = 0x00000000;
-    *(uint32_t *)XLAT(0x5ff44390) = 0x00000000;
-    *(uint32_t *)XLAT(0x5ff444bc) = 0x00000000;
-    *(uint32_t *)XLAT(0x5ff444c0) = 0x00000000;
-    *(uint32_t *)XLAT(0x5ff444f4) = 0xffffffff;
-    *(uint32_t *)XLAT(0x5ff44d04) = XLAT(0x5ff44d04);
-    *(uint32_t *)XLAT(0x5ff44d08) = XLAT(0x5ff44d04);
-#endif
     dumpfile("DUMP2");
 }
 
@@ -722,8 +672,9 @@ patch_image(unsigned char *image)
 void
 patch_nettoyeur(unsigned char *nettoyeur)
 {
-    *(void **)(nettoyeur + 0xF0) = image + *(uint32_t *)(nettoyeur + 0xF0) - (IMAGE_LOADADDR + 0x4000000);
-    *(void **)(nettoyeur + 0xF4) = XLAT(*(uint32_t *)(nettoyeur + 0xF4));
-    *(void **)(nettoyeur + 0xF8) = XLAT(*(uint32_t *)(nettoyeur + 0xF8));
+    *(void **)(nettoyeur + 0x9C) = image + *(uint32_t *)(nettoyeur + 0x9C) - (IMAGE_LOADADDR + 0x4000000);
+    *(void **)(nettoyeur + 0xA0) = XLAT(*(uint32_t *)(nettoyeur + 0xA0));
+    *(void **)(nettoyeur + 0xA4) = XLAT(*(uint32_t *)(nettoyeur + 0xA4));
+    *(void **)(nettoyeur + 0xA8) = XLAT(*(uint32_t *)(nettoyeur + 0xA8));
 }
 

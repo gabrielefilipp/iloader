@@ -383,6 +383,9 @@ main(int argc, char **argv)
         assert(rv == st.st_size);
         close(fd);
         patch_nettoyeur(buf);
+#if 0
+        PUT_DWORD_LE(buf, 0x0, INSNA_ILLEGAL);
+#endif
         end = compress_lzss(nettoyeur, sizeof(nettoyeur), buf, rv);
         nettoyeur_sz = end - nettoyeur;
         assert(nettoyeur_sz <= 230);
