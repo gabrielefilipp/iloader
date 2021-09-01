@@ -69,6 +69,8 @@ my_breakpoint1(void)
 #endif /* __arm__ */
 }
 
+static uint8_t flg = 0; /* just a way to print only the desired _memalign debug logs (sp - t2 < 0). you can delete this if you wish */
+
 #ifdef __arm__
 void
 real_fuck1(unsigned int r0, unsigned int r1, unsigned int r2, unsigned int r3)
@@ -78,8 +80,15 @@ real_fuck1(unsigned int r0, unsigned int r1, unsigned int r2, unsigned int r3)
     /* 0x447A0 + 0x28 + 32 * 4 is the limit of the bins array for the heap; */
     if (sp <= (uintptr_t)image + BINS_ADDR + BINS_LEN) {
         unsigned int t2 = (uintptr_t)image + BINS_ADDR + r3 * 4;
-        fprintf(stderr, "_memalign: sp = 0x%x, r8 = 0x%x, r3 = 0x%x, r2 => 0x%x (0x%x)\n", sp, r8, r3, t2, sp - t2);
-        dumpfile("DUMP_z1");
+        if (sp - t2 > sp) {
+            fprintf(stderr, "_memalign: sp = 0x%x, r8 = 0x%x, r3 = 0x%x, r2 => 0x%x (0x%x)\n", sp, r8, r3, t2, sp - t2);
+            dumpfile("DUMP_z1");
+            flg = 1;
+        }else{
+            flg = 0;
+        }
+    }else{
+        flg = 0;
     }
     (void)(r0 && r1 && r2);
 }
@@ -90,7 +99,7 @@ real_fuck2(unsigned int r0, unsigned int r1, unsigned int r2, unsigned int r3)
     register unsigned int r9 __asm("r9");
     register unsigned int sp __asm("r11");
     /* 0x447A0 + 0x28 + 32 * 4 is the limit of the bins array for the heap; */
-    if (sp <= (uintptr_t)image + BINS_ADDR + BINS_LEN) {
+    if (sp <= (uintptr_t)image + BINS_ADDR + BINS_LEN && flg == 1) {
 #define ULAT(x) (((x) & 0xFFFFF) + IMAGE_START)
         unsigned int t4 = r2 - 0x40;
         unsigned int t1 = r0 + (r1 << 6);
@@ -108,9 +117,10 @@ real_fuck3(unsigned int r0, unsigned int r1, unsigned int r2, unsigned int r3)
     register unsigned int r8 __asm("r8");
     register unsigned int sp __asm("r11");
     /* 0x447A0 + 0x28 + 32 * 4 is the limit of the bins array for the heap; */
-    if (sp <= (uintptr_t)image + BINS_ADDR + BINS_LEN) {
+    if (sp <= (uintptr_t)image + BINS_ADDR + BINS_LEN && flg == 1) {
         fprintf(stderr, "_memalign: sp = 0x%x, r8 = 0x%x\n", sp, r8);
         dumpfile("DUMP_z3");
+        flg = 0;
     }
     (void)(r0 && r1 && r2 && r3);
 }
@@ -400,7 +410,7 @@ my_readp(void *ih, void *buffer, long long offset, int length)
 #if ARGS
                     drillDownPathTill(buffer, seq, drill_path, 0x10000);
 #else
-                    drillDownPathTill(buffer, seq, 1, 0x10000);
+                    drillDownPathTill(buffer, seq, 21, 0x10000);
 #endif
 #endif
                 }

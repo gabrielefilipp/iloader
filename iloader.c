@@ -255,6 +255,8 @@ main(int argc, char **argv)
     
     node_size = atoi(argv[1]);
     drill_path = atoi(argv[2]);
+#else
+    (void)(argc && argv);
 #endif
 
     srand(666);
