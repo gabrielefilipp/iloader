@@ -248,8 +248,9 @@ main(int argc, char **argv)
 #endif /* USE_SIGNAL */
     
 #if ARGS
-    if (argc != 3) {
-        fprintf(stderr, "usage %s <node_size> <drill_path>\n", argv[0]);
+    if (argc != 4) {
+        fprintf(stderr, "%d\n", argc);
+        fprintf(stderr, "usage %s <node_size> <drill_path> <ramdisk>\n", argv[0]);
         return -1;
     }
     
@@ -287,8 +288,11 @@ main(int argc, char **argv)
     assert(rv == st.st_size);
 
     close(fd);
-
-    rfd = open("ramdisk.dmg", O_RDONLY);
+#if ARGS
+    rfd = open(argv[3], O_RDONLY);
+#else
+    rfd = open("ramdiskF.dmg", O_RDONLY);
+#endif
     assert(rfd >= 0);
 
     eprintf("relocating to %p\n", image);

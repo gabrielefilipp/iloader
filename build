@@ -7,5 +7,7 @@ scp -P 2222 ./iloader.c root@localhost:/var/mobile/Documents/iloader/iloader.c;
 scp -P 2222 ./iPhone3\,2/11D257/iBoot.h root@localhost:/var/mobile/Documents/iloader/iBoot.h;
 scp -P 2222 ./iPhone3\,2/11D257/nettoyeur root@localhost:/var/mobile/Documents/iloader/nettoyeur;
 scp -P 2222 ./iPhone3\,2/11D257/ramdisk.dmg root@localhost:/var/mobile/Documents/iloader/ramdisk.dmg;
+scp -P 2222 ./iPhone3\,2/11D257/ramdisk3.dmg root@localhost:/var/mobile/Documents/iloader/ramdisk3.dmg;
+scp -P 2222 ./iPhone3\,2/11D257/ramdiskF.dmg root@localhost:/var/mobile/Documents/iloader/ramdiskF.dmg;
 
 ssh root@localhost -p 2222 "source /etc/profile; cd /var/mobile/Documents/iloader; make all;";
