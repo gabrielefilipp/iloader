@@ -1,3 +1,3 @@
 #!/bin/sh
 
-ssh root@localhost -p 2222 "source /etc/profile; cd /var/mobile/Documents/iloader; script -q /dev/null ./iloader $1 $2 $3";
+ssh root@localhost -p 2222 "source /etc/profile; cd /var/mobile/Documents/iloader; script -q /dev/null ./iloader $1 $2 $3 $4";

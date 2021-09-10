@@ -233,7 +233,7 @@ my_adjust_environ(void)
 void
 suck_sid(void)
 {
-    fprintf(stderr, "suck sid at 0x%x\n", (uintptr_t)suck_sid);
+    fprintf(stderr, "suck sid\n");
     dumpfile("DUMP2");
 }
 
@@ -294,7 +294,11 @@ my_readp(void *ih, void *buffer, long long offset, int length)
 #define TOTAL_NODES (0xFFF)
 #define ROOT_NODE (0xFFFFFF / NODE_SIZE - 1)
 #define EXTENT_SIZE ((unsigned long long)NODE_SIZE * (unsigned long long)TOTAL_NODES)
+#if ARGS
+    if (use_hardcoded_exploit) {
+#else
     if (1) {
+#endif
         
     /* XXX stack recursion eats 208 bytes, watch out for 0x4D2C0 + 0x18 = 0x4D2D8 */
     /* XXX stack recursione eats ??? bytes watch out for 0x41350 + 0x18 = 0x41368 */

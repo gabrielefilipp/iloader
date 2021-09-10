@@ -46,6 +46,7 @@ void check_irq_count(void);
 #if ARGS
 int node_size;
 int drill_path;
+int use_hardcoded_exploit;
 #endif
 
 #include "asm.h"
@@ -248,14 +249,15 @@ main(int argc, char **argv)
 #endif /* USE_SIGNAL */
     
 #if ARGS
-    if (argc != 4) {
+    if (argc != 5) {
         fprintf(stderr, "%d\n", argc);
-        fprintf(stderr, "usage %s <node_size> <drill_path> <ramdisk>\n", argv[0]);
+        fprintf(stderr, "usage %s <node_size> <drill_path> <ramdisk> <use_hardcoded_exploit>\n", argv[0]);
         return -1;
     }
     
     node_size = atoi(argv[1]);
     drill_path = atoi(argv[2]);
+    use_hardcoded_exploit = atoi(argv[4]);
 #else
     (void)(argc && argv);
 #endif
