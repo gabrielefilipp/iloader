@@ -37,7 +37,7 @@
 #define INSNA_NOP			0xE1A00000
 #define INSNA_RETURN			0xE12FFF1E
 
-#define INSNT_ILLEGAL			0xdef0
+#define INSNT_ILLEGAL			0xDEF0
 #define INSNA_ILLEGAL			0xe7ffdef0
 
 #define ILLNO SIGILL

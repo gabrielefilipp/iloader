@@ -250,7 +250,6 @@ main(int argc, char **argv)
     
 #if ARGS
     if (argc != 5) {
-        fprintf(stderr, "%d\n", argc);
         fprintf(stderr, "usage %s <node_size> <drill_path> <ramdisk> <use_hardcoded_exploit>\n", argv[0]);
         return -1;
     }
@@ -353,7 +352,7 @@ main(int argc, char **argv)
 #if 0 && defined(__arm__) /* this is dangerous, enable only AFTER everything works ok */
     rv = mprotect(image + IMAGE_TEXT_END - IMAGE_START, IMAGE_END + IMAGE_HEAP_SIZE - IMAGE_TEXT_END, PROT_READ | PROT_WRITE | PROT_EXEC);
     assert(rv == 0);
-#elif 1 && defined(__arm__) /* this is even more DANGEROUS, enable only AFTER everything works ok */
+#elif 0 && defined(__arm__) /* this is even more DANGEROUS, enable only AFTER everything works ok */
     rv = mprotect(image, IMAGE_SIZE + IMAGE_HEAP_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC);
     assert(rv == 0);
     image2 = malloc(IMAGE_SIZE);

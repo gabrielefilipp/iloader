@@ -1,0 +1,13 @@
+#!/bin/sh
+
+scp ./Makefile root@192.168.0.110:/var/mobile/Documents/iloader/Makefile;
+#scp ./endian.h root@192.168.0.110:/var/mobile/Documents/iloader/endian.h;
+#scp ./asm.h root@192.168.0.110:/var/mobile/Documents/iloader/asm.h;
+scp ./iloader.c root@192.168.0.110:/var/mobile/Documents/iloader/iloader.c;
+scp ./iPhone3\,2/11D257/iBoot.h root@192.168.0.110:/var/mobile/Documents/iloader/iBoot.h;
+#scp ./iPhone3\,2/11D257/nettoyeur root@192.168.0.110:/var/mobile/Documents/iloader/nettoyeur;
+#scp ./iPhone3\,2/11D257/ramdisk.dmg root@192.168.0.110:/var/mobile/Documents/iloader/ramdisk.dmg;
+#scp ./iPhone3\,2/11D257/ramdisk3.dmg root@192.168.0.110:/var/mobile/Documents/iloader/ramdisk3.dmg;
+#scp ./iPhone3\,2/11D257/ramdiskF.dmg root@192.168.0.110:/var/mobile/Documents/iloader/ramdiskF.dmg;
+
+ssh root@192.168.0.110 "source /etc/profile; cd /var/mobile/Documents/iloader; make all;";

@@ -4,6 +4,7 @@ CFLAGS += -Wno-long-long
 CFLAGS += -O2
 CFLAGS += -DUSE_SIGNAL=2
 CFLAGS += -DSHELLCODE=1
+CFLAGS += -DDEBUG_MALLOC=1
 CFLAGS += -DNETTO=1
 CFLAGS += -DARGS=1
 CFLAGS += -march=armv7 -mthumb
