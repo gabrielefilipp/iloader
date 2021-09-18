@@ -8,64 +8,70 @@ Disassembly of section .text:
        0:	eafffffe 	b	0 <_entry>
 	...
 
-0001efe6 <_get_current_task>:
-   1efe6:	4770      	bx	lr
+5ff1f038 <_get_current_task>:
+5ff1f038:	4770      	bx	lr
 	...
 
-00020300 <_sub_5FF20300>:
-   20300:	4770      	bx	lr
+5ff20300 <_cache_stuff>:
+5ff20300:	4770      	bx	lr
 	...
 
-00023260 <_decompress_lzss>:
-   23260:	4770      	bx	lr
+5ff23260 <_decompress_lzss>:
+5ff23260:	4770      	bx	lr
 	...
 
-00031e64 <_bcopy>:
-   31e64:	e12fff1e 	bx	lr
+5ff31e64 <_bcopy>:
+5ff31e64:	e12fff1e 	bx	lr
 	...
 
-00032884 <_disable_interrupts>:
-   32884:	4770      	bx	lr
+5ff32884 <_disable_interrupts>:
+5ff32884:	4770      	bx	lr
 	...
 
-00044708 <_payload>:
-   44708:	f8df d048 	ldr.w	sp, [pc, #72]	; 44754 <next>
-   4470c:	f7ee f8ba 	bl	32884 <_disable_interrupts>
-   44710:	4c11      	ldr	r4, [pc, #68]	; (44758 <next+0x4>)
-   44712:	4812      	ldr	r0, [pc, #72]	; (4475c <next+0x8>)
-   44714:	4621      	mov	r1, r4
-   44716:	4a12      	ldr	r2, [pc, #72]	; (44760 <next+0xc>)
-   44718:	f7ed eba4 	blx	31e64 <_bcopy>
-   4471c:	f44f 5110 	mov.w	r1, #9216	; 0x2400
-   44720:	f8a4 1e2c 	strh.w	r1, [r4, #3628]	; 0xe2c
-   44724:	480f      	ldr	r0, [pc, #60]	; (44764 <next+0x10>)
-   44726:	f04f 4180 	mov.w	r1, #1073741824	; 0x40000000
-   4472a:	5021      	str	r1, [r4, r0]
-   4472c:	480e      	ldr	r0, [pc, #56]	; (44768 <next+0x14>)
-   4472e:	490f      	ldr	r1, [pc, #60]	; (4476c <next+0x18>)
-   44730:	5021      	str	r1, [r4, r0]
-   44732:	480f      	ldr	r0, [pc, #60]	; (44770 <next+0x1c>)
-   44734:	21fc      	movs	r1, #252	; 0xfc
-   44736:	4a0f      	ldr	r2, [pc, #60]	; (44774 <next+0x20>)
-   44738:	23a4      	movs	r3, #164	; 0xa4
-   4473a:	b401      	push	{r0}
-   4473c:	f7de fd90 	bl	23260 <_decompress_lzss>
-   44740:	480c      	ldr	r0, [pc, #48]	; (44774 <next+0x20>)
-   44742:	4780      	blx	r0
-   44744:	46a6      	mov	lr, r4
-   44746:	bd00      	pop	{pc}
+5ff44708 <_payload>:
+5ff44708:	f8df d058 	ldr.w	sp, [pc, #88]	; 5ff44764 <_next+0x10>
+5ff4470c:	f7ee f8ba 	bl	5ff32884 <_disable_interrupts>
+5ff44710:	4c15      	ldr	r4, [pc, #84]	; (5ff44768 <_next+0x14>)
+5ff44712:	4816      	ldr	r0, [pc, #88]	; (5ff4476c <_next+0x18>)
+5ff44714:	4621      	mov	r1, r4
+5ff44716:	4a16      	ldr	r2, [pc, #88]	; (5ff44770 <_next+0x1c>)
+5ff44718:	f7ed eba4 	blx	5ff31e64 <_bcopy>
+5ff4471c:	f44f 5110 	mov.w	r1, #9216	; 0x2400
+5ff44720:	f8a4 1e2c 	strh.w	r1, [r4, #3628]	; 0xe2c
+5ff44724:	4813      	ldr	r0, [pc, #76]	; (5ff44774 <_next+0x20>)
+5ff44726:	f04f 4180 	mov.w	r1, #1073741824	; 0x40000000
+5ff4472a:	5021      	str	r1, [r4, r0]
+5ff4472c:	4812      	ldr	r0, [pc, #72]	; (5ff44778 <_next+0x24>)
+5ff4472e:	4913      	ldr	r1, [pc, #76]	; (5ff4477c <_next+0x28>)
+5ff44730:	5021      	str	r1, [r4, r0]
+5ff44732:	f7da fc81 	bl	5ff1f038 <_get_current_task>
+5ff44736:	2100      	movs	r1, #0
+5ff44738:	6441      	str	r1, [r0, #68]	; 0x44
+5ff4473a:	4811      	ldr	r0, [pc, #68]	; (5ff44780 <_next+0x2c>)
+5ff4473c:	21ac      	movs	r1, #172	; 0xac
+5ff4473e:	4a11      	ldr	r2, [pc, #68]	; (5ff44784 <_next+0x30>)
+5ff44740:	23a4      	movs	r3, #164	; 0xa4
+5ff44742:	4605      	mov	r5, r0
+5ff44744:	e006      	b.n	5ff44754 <_next>
+5ff44746:	bf00      	nop
 	...
 
-00044754 <next>:
-   44754:	5fff8000 	svcpl	0x00ff8000
-   44758:	44000000 	strmi	r0, [r0]
-   4475c:	5ff00000 	svcpl	0x00f00000	; IMB
-   44760:	00041640 	andeq	r1, r4, r0, asr #12
-   44764:	0003f378 	andeq	pc, r3, r8, ror r3	; <UNPREDICTABLE>
-   44768:	00019164 	andeq	r9, r1, r4, ror #2
-   4476c:	60182000 	andsvs	r2, r8, r0
-   44770:	5ff48000 	svcpl	0x00f48000
-   44774:	5ff445bc 	svcpl	0x00f445bc
+5ff44754 <_next>:
+5ff44754:	f7de fd84 	bl	5ff23260 <_decompress_lzss>
+5ff44758:	480a      	ldr	r0, [pc, #40]	; (5ff44784 <_next+0x30>)
+5ff4475a:	4780      	blx	r0
+5ff4475c:	f7db fdd0 	bl	5ff20300 <_cache_stuff>
+5ff44760:	47a8      	blx	r5
+5ff44762:	4720      	bx	r4
+5ff44764:	5fff8000 	svcpl	0x00ff8000
+5ff44768:	44000001 	strmi	r0, [r0], #-1
+5ff4476c:	5ff00000 	svcpl	0x00f00000	; IMB
+5ff44770:	00041640 	andeq	r1, r4, r0, asr #12
+5ff44774:	0003f378 	andeq	pc, r3, r8, ror r3	; <UNPREDICTABLE>
+5ff44778:	00019164 	andeq	r9, r1, r4, ror #2
+5ff4477c:	60182000 	andsvs	r2, r8, r0
+5ff44780:	5ff48000 	svcpl	0x00f48000
+5ff44784:	5ff445bc 	svcpl	0x00f445bc
 
 Disassembly of section .ARM.attributes:
 

