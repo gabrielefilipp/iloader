@@ -28,50 +28,48 @@ Disassembly of section .text:
 5ff32884:	4770      	bx	lr
 	...
 
-5ff44708 <_payload>:
-5ff44708:	f8df d058 	ldr.w	sp, [pc, #88]	; 5ff44764 <_next+0x10>
-5ff4470c:	f7ee f8ba 	bl	5ff32884 <_disable_interrupts>
-5ff44710:	4c15      	ldr	r4, [pc, #84]	; (5ff44768 <_next+0x14>)
-5ff44712:	4816      	ldr	r0, [pc, #88]	; (5ff4476c <_next+0x18>)
-5ff44714:	4621      	mov	r1, r4
-5ff44716:	4a16      	ldr	r2, [pc, #88]	; (5ff44770 <_next+0x1c>)
-5ff44718:	f7ed eba4 	blx	5ff31e64 <_bcopy>
-5ff4471c:	f44f 5110 	mov.w	r1, #9216	; 0x2400
-5ff44720:	f8a4 1e2c 	strh.w	r1, [r4, #3628]	; 0xe2c
-5ff44724:	4813      	ldr	r0, [pc, #76]	; (5ff44774 <_next+0x20>)
-5ff44726:	f04f 4180 	mov.w	r1, #1073741824	; 0x40000000
-5ff4472a:	5021      	str	r1, [r4, r0]
-5ff4472c:	4812      	ldr	r0, [pc, #72]	; (5ff44778 <_next+0x24>)
-5ff4472e:	4913      	ldr	r1, [pc, #76]	; (5ff4477c <_next+0x28>)
-5ff44730:	5021      	str	r1, [r4, r0]
-5ff44732:	f7da fc81 	bl	5ff1f038 <_get_current_task>
-5ff44736:	2100      	movs	r1, #0
-5ff44738:	6441      	str	r1, [r0, #68]	; 0x44
-5ff4473a:	4811      	ldr	r0, [pc, #68]	; (5ff44780 <_next+0x2c>)
-5ff4473c:	21ac      	movs	r1, #172	; 0xac
-5ff4473e:	4a11      	ldr	r2, [pc, #68]	; (5ff44784 <_next+0x30>)
-5ff44740:	23a4      	movs	r3, #164	; 0xa4
-5ff44742:	4605      	mov	r5, r0
-5ff44744:	e006      	b.n	5ff44754 <_next>
-5ff44746:	bf00      	nop
+5ff443e0 <_vh>:
+5ff443e0:	48db      	ldr	r0, [pc, #876]	; (5ff44750 <_payload+0x20>)
+5ff443e2:	f04f 4180 	mov.w	r1, #1073741824	; 0x40000000
+5ff443e6:	5021      	str	r1, [r4, r0]
+5ff443e8:	48da      	ldr	r0, [pc, #872]	; (5ff44754 <_payload+0x24>)
+5ff443ea:	49db      	ldr	r1, [pc, #876]	; (5ff44758 <_payload+0x28>)
+5ff443ec:	5021      	str	r1, [r4, r0]
+5ff443ee:	f7da fe23 	bl	5ff1f038 <_get_current_task>
+5ff443f2:	2100      	movs	r1, #0
+5ff443f4:	6441      	str	r1, [r0, #68]	; 0x44
+5ff443f6:	48d9      	ldr	r0, [pc, #868]	; (5ff4475c <_payload+0x2c>)
+5ff443f8:	21f8      	movs	r1, #248	; 0xf8
+5ff443fa:	4ad9      	ldr	r2, [pc, #868]	; (5ff44760 <_payload+0x30>)
+5ff443fc:	23de      	movs	r3, #222	; 0xde
+5ff443fe:	4605      	mov	r5, r0
+5ff44400:	f7de ff2e 	bl	5ff23260 <_decompress_lzss>
+5ff44404:	48d6      	ldr	r0, [pc, #856]	; (5ff44760 <_payload+0x30>)
+5ff44406:	4780      	blx	r0
+5ff44408:	f7db ff7a 	bl	5ff20300 <_cache_stuff>
+5ff4440c:	47a8      	blx	r5
+5ff4440e:	4720      	bx	r4
 	...
 
-5ff44754 <_next>:
-5ff44754:	f7de fd84 	bl	5ff23260 <_decompress_lzss>
-5ff44758:	480a      	ldr	r0, [pc, #40]	; (5ff44784 <_next+0x30>)
-5ff4475a:	4780      	blx	r0
-5ff4475c:	f7db fdd0 	bl	5ff20300 <_cache_stuff>
-5ff44760:	47a8      	blx	r5
-5ff44762:	4720      	bx	r4
+5ff44730 <_payload>:
+5ff44730:	f8df d030 	ldr.w	sp, [pc, #48]	; 5ff44764 <_payload+0x34>
+5ff44734:	f7ee f8a6 	bl	5ff32884 <_disable_interrupts>
+5ff44738:	f04f 4488 	mov.w	r4, #1140850688	; 0x44000000
+5ff4473c:	480a      	ldr	r0, [pc, #40]	; (5ff44768 <_payload+0x38>)
+5ff4473e:	4621      	mov	r1, r4
+5ff44740:	4a0a      	ldr	r2, [pc, #40]	; (5ff4476c <_payload+0x3c>)
+5ff44742:	f7ed eb90 	blx	5ff31e64 <_bcopy>
+5ff44746:	f44f 5110 	mov.w	r1, #9216	; 0x2400
+5ff4474a:	f8a4 1e2c 	strh.w	r1, [r4, #3628]	; 0xe2c
+5ff4474e:	e647      	b.n	5ff443e0 <_vh>
+5ff44750:	0003f378 	andeq	pc, r3, r8, ror r3	; <UNPREDICTABLE>
+5ff44754:	00019164 	andeq	r9, r1, r4, ror #2
+5ff44758:	60182000 	andsvs	r2, r8, r0
+5ff4475c:	5ff48000 	svcpl	0x00f48000
+5ff44760:	5ff445bc 	svcpl	0x00f445bc
 5ff44764:	5fff8000 	svcpl	0x00ff8000
-5ff44768:	44000001 	strmi	r0, [r0], #-1
-5ff4476c:	5ff00000 	svcpl	0x00f00000	; IMB
-5ff44770:	00041640 	andeq	r1, r4, r0, asr #12
-5ff44774:	0003f378 	andeq	pc, r3, r8, ror r3	; <UNPREDICTABLE>
-5ff44778:	00019164 	andeq	r9, r1, r4, ror #2
-5ff4477c:	60182000 	andsvs	r2, r8, r0
-5ff44780:	5ff48000 	svcpl	0x00f48000
-5ff44784:	5ff445bc 	svcpl	0x00f445bc
+5ff44768:	5ff00000 	svcpl	0x00f00000	; IMB
+5ff4476c:	00041640 	andeq	r1, r4, r0, asr #12
 
 Disassembly of section .ARM.attributes:
 
